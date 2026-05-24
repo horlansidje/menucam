@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu — <%= restaurant.nom %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/menu-client.css"/>
+  <meta name="theme-color" content="#1a1a2e"/>
+</head>
+<body>
+
+<!-- Header restaurant -->
+<header class="menu-header">
+  <div class="header-bg"></div>
+  <div class="header-content">
+    <% if(restaurant.logo) { %>
+      <img src="<%= restaurant.logo %>" alt="<%= restaurant.nom %>" class="resto-logo"/>
+    <% } else { %>
+      <div class="resto-logo-placeholder">🍽️</div>
+    <% } %>
+    <div class="resto-info">
+      <h1 class="resto-name"><%= restaurant.nom %></h1>
+      <% if(restaurant.adresse || restaurant.ville) { %>
+        <p class="resto-adresse">📍 <%= [restaurant.adresse, restaurant.ville].filter(Boolean).join(', ') %></p>
+      <% } %>
+      <% if(restaurant.telephone) { %>
+        <a href="tel:<%= restaurant.telephone %>" class="resto-tel">📞 <%= restaurant.telephone %></a>
+      <% } %>
+      <% if(restaurant.description) { %>
+        <p class="resto-desc"><%= restaurant.description %></p>
+      <% } %>
+    </div>
+  </div>
+</header>
+
+<!-- Navigation catégories -->
+<% const catNames = Object.keys(categories); %>
+<% if(catNames.length > 0) { %>
+<nav class="cat-nav" id="catNav">
+  <% catNames.forEach((cat, i) => { %>
+    <button class="cat-btn <%= i===0?'active':'' %>" onclick="scrollTocat('<%= cat %>')"><%= cat %></button>
+  <% }); %>
+</nav>
+<% } %>
+
+<!-- Menu items -->
+<main class="menu-main">
+  <% if(catNames.length === 0) { %>
+    <div class="menu-empty">
+      <div class="empty-icon">🍽️</div>
+      <p>Le menu sera disponible bientôt.</p>
+    </div>
+  <% } else { %>
+    <% catNames.forEach(cat => { %>
+      <section class="menu-section" id="cat-<%= cat.replace(/\s/g,'-') %>" data-cat="<%= cat %>">
+        <h2 class="cat-title"><%= cat %></h2>
+        <div class="plats-list">
+          <% categories[cat].forEach(plat => { %>
+            <div class="plat-item" onclick="ajouterAuPanier('<%= plat._id %>', '<%= plat.nom.replace(/'/g,"\\'") %>', <%= plat.prix %>)">
+              <div class="plat-info">
+                <h3 class="plat-nom"><%= plat.nom %></h3>
+                <% if(plat.description) { %>
+                  <p class="plat-desc"><%= plat.description %></p>
+                <% } %>
+                <span class="plat-prix"><%= plat.prix.toLocaleString('fr-FR') %> FCFA</span>
+              </div>
+              <% if(plat.photo) { %>
+                <div class="plat-photo-wrap">
+                  <img src="<%= plat.photo %>" alt="<%= plat.nom %>" class="plat-photo" loading="lazy"/>
+                  <button class="add-btn" id="btn-<%= plat._id %>">+</button>
+                </div>
+              <% } else { %>
+                <div class="plat-photo-wrap no-photo">
+                  <button class="add-btn" id="btn-<%= plat._id %>">+</button>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </section>
+    <% }); %>
+  <% } %>
+</main>
+
+<!-- Panier flottant -->
+<div class="panier-bar" id="panierBar" style="display:none">
+  <div class="panier-summary">
+    <span class="panier-count" id="panierCount">0 article</span>
+    <span class="panier-total" id="panierTotal">0 FCFA</span>
+  </div>
+  <button class="panier-btn" onclick="ouvrirPanier()">Voir le panier →</button>
+</div>
+
+<!-- Modal panier -->
+<div class="panier-overlay" id="panierOverlay" style="display:none">
+  <div class="panier-modal">
+    <div class="panier-header">
+      <h2>Mon panier</h2>
+      <button class="panier-close" onclick="fermerPanier()">✕</button>
+    </div>
+    <div class="panier-items" id="panierItems"></div>
+    <div class="panier-footer">
+      <div class="panier-infos">
+        <div class="panier-info-row">
+          <label>Votre prénom</label>
+          <input type="text" id="clientNom" placeholder="Ex: Jean-Paul" class="panier-input"/>
+        </div>
+        <div class="panier-info-row">
+          <label>N° de table (optionnel)</label>
+          <input type="text" id="clientTable" placeholder="Ex: 5" class="panier-input"/>
+        </div>
+        <div class="panier-info-row">
+          <label>Note (optionnel)</label>
+          <input type="text" id="clientNote" placeholder="Ex: sans piment" class="panier-input"/>
+        </div>
+      </div>
+      <div class="panier-total-row">
+        <span>Total</span>
+        <span class="total-amount" id="panierTotalModal">0 FCFA</span>
+      </div>
+      <button class="btn-commander-whatsapp" onclick="commanderWhatsApp()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Commander via WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const RESTAURANT_ID  = '<%= restaurant._id %>';
+  const RESTAURANT_TEL = '<%= restaurant.telephone ? restaurant.telephone.replace(/\s/g,"") : "" %>';
+  const RESTAURANT_NOM = '<%= restaurant.nom.replace(/'/g,"\\'" ) %>';
+</script>
+<script src="/js/menu-client.js"></script>
+</body>
+</html>

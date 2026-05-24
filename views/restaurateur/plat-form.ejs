@@ -1,0 +1,124 @@
+<%- include('../partials/head', {title: plat ? 'Modifier le plat' : 'Nouveau plat'}) %>
+<link rel="stylesheet" href="/css/dashboard.css"/>
+<%- include('../partials/navbar', {activePage: 'plats'}) %>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <a href="/plats" class="back-link">← Retour aux plats</a>
+      <h1 class="page-title"><%= plat ? 'Modifier : ' + plat.nom : 'Ajouter un nouveau plat' %></h1>
+    </div>
+  </div>
+
+  <% if(error && error.length > 0) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <div class="form-card">
+    <form method="POST" action="<%= plat ? '/plats/' + plat._id + '/modifier' : '/plats/nouveau' %>"
+      enctype="multipart/form-data" class="plat-form">
+
+      <div class="form-grid">
+        <div class="form-left">
+          <!-- Photo -->
+          <div class="form-group">
+            <label>Photo du plat</label>
+            <div class="photo-upload" id="photoUpload">
+              <% if(plat && plat.photo) { %>
+                <img src="<%= plat.photo %>" alt="Photo actuelle" id="photoPreview" class="photo-preview"/>
+              <% } else { %>
+                <div class="photo-placeholder" id="photoPlaceholder">
+                  <span class="upload-icon">📸</span>
+                  <span>Cliquez pour ajouter une photo</span>
+                  <span class="upload-sub">JPG, PNG · Max 5 Mo</span>
+                </div>
+                <img id="photoPreview" class="photo-preview" style="display:none"/>
+              <% } %>
+              <input type="file" name="photo" id="photoInput" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+
+          <!-- Disponibilité -->
+          <div class="form-group">
+            <label class="toggle-label">
+              <span>Disponible au menu</span>
+              <label class="toggle-switch">
+                <input type="checkbox" name="disponible" <%= !plat || plat.disponible ? 'checked' : '' %>/>
+                <span class="toggle-slider"></span>
+              </label>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-right">
+          <div class="form-group">
+            <label>Nom du plat *</label>
+            <input type="text" name="nom" value="<%= plat ? plat.nom : '' %>"
+              placeholder="Ex: Ndolé au crabe, Poulet DG..." required/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="3"
+              placeholder="Ingrédients, spécialités, allergènes..."><%= plat ? plat.description : '' %></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Prix (FCFA) *</label>
+              <input type="number" name="prix" value="<%= plat ? plat.prix : '' %>"
+                placeholder="Ex: 3500" min="0" step="50" required/>
+            </div>
+            <div class="form-group">
+              <label>Catégorie *</label>
+              <input type="text" name="categorie" value="<%= plat ? plat.categorie : '' %>"
+                placeholder="Ex: Entrées, Plats, Boissons..." list="categories-list" required/>
+              <datalist id="categories-list">
+                <option value="Entrées"/>
+                <option value="Plats principaux"/>
+                <option value="Viandes"/>
+                <option value="Poissons"/>
+                <option value="Végétarien"/>
+                <option value="Desserts"/>
+                <option value="Boissons"/>
+                <option value="Jus naturels"/>
+                <option value="Bières & Softs"/>
+                <option value="Spécialités camerounaises"/>
+              </datalist>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/plats" class="btn-cancel">Annuler</a>
+        <button type="submit" class="btn-submit-form">
+          <%= plat ? '💾 Enregistrer les modifications' : '➕ Ajouter le plat' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const photoUpload = document.getElementById('photoUpload');
+  const photoInput  = document.getElementById('photoInput');
+  const photoPreview = document.getElementById('photoPreview');
+  const photoPlaceholder = document.getElementById('photoPlaceholder');
+
+  photoUpload.addEventListener('click', () => photoInput.click());
+  photoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      photoPreview.src = ev.target.result;
+      photoPreview.style.display = 'block';
+      if (photoPlaceholder) photoPlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

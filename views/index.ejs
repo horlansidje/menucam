@@ -1,0 +1,157 @@
+<%- include('partials/head', {title: 'Bienvenue'}) %>
+<link rel="stylesheet" href="/css/landing.css"/>
+
+<header class="landing-header">
+  <div class="landing-nav">
+    <div class="brand">
+      <span class="brand-icon">🍽️</span>
+      <span class="brand-name">MenuCam</span>
+    </div>
+    <div class="landing-nav-links">
+      <a href="/auth/connexion" class="btn-outline">Connexion</a>
+      <a href="/auth/inscription" class="btn-primary">Commencer gratuitement</a>
+    </div>
+  </div>
+</header>
+
+<main class="landing-main">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🇨🇲 Fait pour le Cameroun</div>
+      <h1 class="hero-title">Votre menu en ligne,<br/><span class="accent">scannable en 2 secondes</span></h1>
+      <p class="hero-desc">Fini les menus en carton qui se déchirent et les prix à effacer à la main. Créez votre menu digital, générez un QR code, et vos clients commandent directement depuis leur téléphone.</p>
+      <div class="hero-actions">
+        <a href="/auth/inscription" class="btn-hero">Créer mon menu gratuit</a>
+        <a href="#comment" class="btn-ghost">Voir comment ça marche</a>
+      </div>
+      <div class="hero-trust">
+        <span>✅ Aucune application à installer</span>
+        <span>✅ Compatible MTN & Orange Money</span>
+        <span>✅ Fonctionne avec WhatsApp</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="mock-header">
+            <div class="mock-avatar">🍽️</div>
+            <div>
+              <div class="mock-title">Restaurant La Douceur</div>
+              <div class="mock-sub">Akwa, Douala</div>
+            </div>
+          </div>
+          <div class="mock-cat">🥩 Viandes</div>
+          <div class="mock-item">
+            <div>
+              <div class="mock-item-name">Ndolé spécial</div>
+              <div class="mock-item-price">4 500 FCFA</div>
+            </div>
+            <button class="mock-add">+</button>
+          </div>
+          <div class="mock-item">
+            <div>
+              <div class="mock-item-name">Poulet DG</div>
+              <div class="mock-item-price">5 000 FCFA</div>
+            </div>
+            <button class="mock-add">+</button>
+          </div>
+          <div class="mock-cat">🥤 Boissons</div>
+          <div class="mock-item">
+            <div>
+              <div class="mock-item-name">Jus de bissap</div>
+              <div class="mock-item-price">500 FCFA</div>
+            </div>
+            <button class="mock-add active">1</button>
+          </div>
+          <div class="mock-cart">
+            <span>1 article — 500 FCFA</span>
+            <button>Commander via WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="comment" id="comment">
+    <h2>Comment ça marche ?</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-icon">✍️</div>
+        <h3>Créez votre compte</h3>
+        <p>Inscrivez votre restaurant en 2 minutes. Ajoutez vos plats avec photos et prix en FCFA.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-icon">📲</div>
+        <h3>Imprimez votre QR code</h3>
+        <p>Téléchargez votre QR code unique et collez-le sur vos tables, comptoir ou devanture.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-icon">💬</div>
+        <h3>Recevez vos commandes</h3>
+        <p>Vos clients scannent, choisissent et commandent via WhatsApp. Vous recevez tout en temps réel.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing">
+    <h2>Tarifs simples et transparents</h2>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Gratuit</div>
+        <div class="plan-price">0 <span>FCFA/mois</span></div>
+        <ul class="plan-features">
+          <li>✅ Jusqu'à 20 plats</li>
+          <li>✅ 1 QR code</li>
+          <li>✅ Commandes WhatsApp</li>
+          <li>❌ Commandes illimitées</li>
+          <li>❌ Dashboard analytics</li>
+        </ul>
+        <a href="/auth/inscription" class="btn-outline-plan">Commencer</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Le plus populaire</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">15 000 <span>FCFA/mois</span></div>
+        <ul class="plan-features">
+          <li>✅ Plats illimités</li>
+          <li>✅ QR codes multiples</li>
+          <li>✅ Commandes illimitées</li>
+          <li>✅ Dashboard temps réel</li>
+          <li>✅ Support WhatsApp</li>
+        </ul>
+        <a href="/auth/inscription" class="btn-primary-plan">Essai 30 jours gratuit</a>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">25 000 <span>FCFA/mois</span></div>
+        <ul class="plan-features">
+          <li>✅ Tout du plan Pro</li>
+          <li>✅ Multi-restaurants</li>
+          <li>✅ Rapports PDF</li>
+          <li>✅ Intégration Mobile Money</li>
+          <li>✅ Support prioritaire</li>
+        </ul>
+        <a href="/auth/inscription" class="btn-outline-plan">Contacter</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="landing-footer">
+  <div class="footer-content">
+    <div class="brand">
+      <span class="brand-icon">🍽️</span>
+      <span class="brand-name">MenuCam</span>
+    </div>
+    <p>Fait avec ❤️ à Douala, Cameroun · 2024</p>
+    <p style="font-size:12px;opacity:0.5">Pour les restaurants de Douala, Yaoundé et partout au Cameroun</p>
+  </div>
+</footer>
+
+</body>
+</html>

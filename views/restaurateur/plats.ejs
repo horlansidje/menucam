@@ -1,0 +1,80 @@
+<%- include('../partials/head', {title: 'Mes plats'}) %>
+<link rel="stylesheet" href="/css/dashboard.css"/>
+<%- include('../partials/navbar', {activePage: 'plats'}) %>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes plats</h1>
+      <p class="page-sub"><%= plats.length %> plat(s) dans votre menu</p>
+    </div>
+    <a href="/plats/nouveau" class="btn-primary-action">+ Ajouter un plat</a>
+  </div>
+
+  <% if(error && error.length > 0) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+  <% if(success && success.length > 0) { %>
+    <div class="alert alert-success"><%= success %></div>
+  <% } %>
+
+  <!-- Filtre par catégorie -->
+  <% if(categories.length > 0) { %>
+  <div class="filter-bar">
+    <button class="filter-btn active" data-cat="tous">Tous (<%= plats.length %>)</button>
+    <% categories.forEach(cat => { %>
+      <button class="filter-btn" data-cat="<%= cat %>"><%= cat %></button>
+    <% }); %>
+  </div>
+  <% } %>
+
+  <% if(plats.length === 0) { %>
+    <div class="empty-page">
+      <div class="empty-icon-lg">🍽️</div>
+      <h2>Votre menu est vide</h2>
+      <p>Ajoutez vos premiers plats pour générer votre QR code et commencer à recevoir des commandes.</p>
+      <a href="/plats/nouveau" class="btn-primary-action">Ajouter mon premier plat</a>
+    </div>
+  <% } else { %>
+    <div class="plats-grid" id="platsGrid">
+      <% plats.forEach(plat => { %>
+        <div class="plat-card <%= !plat.disponible ? 'indisponible' : '' %>" data-cat="<%= plat.categorie %>">
+          <div class="plat-photo">
+            <% if(plat.photo) { %>
+              <img src="<%= plat.photo %>" alt="<%= plat.nom %>"/>
+            <% } else { %>
+              <div class="plat-photo-placeholder">🍽️</div>
+            <% } %>
+            <span class="plat-cat-tag"><%= plat.categorie %></span>
+          </div>
+          <div class="plat-body">
+            <h3 class="plat-nom"><%= plat.nom %></h3>
+            <% if(plat.description) { %>
+              <p class="plat-desc"><%= plat.description %></p>
+            <% } %>
+            <div class="plat-footer">
+              <span class="plat-prix"><%= plat.prix.toLocaleString('fr-FR') %> FCFA</span>
+              <div class="plat-actions">
+                <button class="btn-toggle-dispo <%= plat.disponible ? 'dispo' : 'indispo' %>"
+                  onclick="toggleDispo('<%= plat._id %>', this)"
+                  title="<%= plat.disponible ? 'Rendre indisponible' : 'Rendre disponible' %>">
+                  <%= plat.disponible ? '✅' : '🔴' %>
+                </button>
+                <a href="/plats/<%= plat._id %>/modifier" class="btn-edit" title="Modifier">✏️</a>
+                <form method="POST" action="/plats/<%= plat._id %>/supprimer" style="display:inline"
+                  onsubmit="return confirm('Supprimer ce plat ?')">
+                  <button type="submit" class="btn-delete" title="Supprimer">🗑️</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<script src="/js/plats.js"></script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

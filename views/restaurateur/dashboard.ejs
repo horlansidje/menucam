@@ -1,149 +1,72 @@
-<%- include('../partials/head', {title: 'Dashboard'}) %>
+<%- include('../partials/head',{title:'Dashboard'}) %>
 <link rel="stylesheet" href="/css/dashboard.css"/>
-<%- include('../partials/navbar', {activePage: 'dashboard', stats: stats}) %>
-
+<%- include('../partials/navbar',{activePage:'dashboard',stats:stats}) %>
 <div class="page-wrapper">
   <div class="page-header">
-    <div>
-      <h1 class="page-title">Bonjour, <%= restaurant.nom %> 👋</h1>
-      <p class="page-sub">Voici un aperçu de votre activité aujourd'hui</p>
-    </div>
-    <a href="/menu/<%= restaurant._id %>" target="_blank" class="btn-preview">
-      👁️ Voir mon menu public
-    </a>
+    <div><h1 class="page-title">Bonjour, <%= restaurant.nom %> 👋</h1><p class="page-sub">Voici votre activité en temps réel</p></div>
+    <a href="/menu/<%= restaurant._id %>" target="_blank" class="btn btn-outline">👁️ Voir mon menu</a>
   </div>
-
-  <% if(success && success.length > 0) { %>
-    <div class="alert alert-success"><%= success %></div>
-  <% } %>
-
-  <!-- Stats Cards -->
+  <% if(success&&success.length>0){%><div class="alert alert-success">✅ <%=success%></div><%}%>
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fff8e6;color:#f59e0b">📋</div>
-      <div class="stat-info">
-        <div class="stat-value"><%= stats.totalPlats %></div>
-        <div class="stat-label">Plats au menu</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#e8f5e9;color:#22c55e">🛒</div>
-      <div class="stat-info">
-        <div class="stat-value"><%= stats.commandesAujourdhui %></div>
-        <div class="stat-label">Commandes aujourd'hui</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fce4ec;color:#e91e63">⏳</div>
-      <div class="stat-info">
-        <div class="stat-value"><%= stats.commandesEnAttente %></div>
-        <div class="stat-label">En attente</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#e3f2fd;color:#2196f3">💰</div>
-      <div class="stat-info">
-        <div class="stat-value"><%= stats.caAujourdhui.toLocaleString('fr-FR') %></div>
-        <div class="stat-label">FCFA générés aujourd'hui</div>
-      </div>
-    </div>
+    <div class="stat-card s-or"><div class="stat-icon" style="background:#FFF3E8">🍽️</div><div><div class="stat-value"><%=stats.totalPlats%></div><div class="stat-label">Plats au menu</div></div></div>
+    <div class="stat-card s-vert"><div class="stat-icon" style="background:#D8F3DC">🛒</div><div><div class="stat-value"><%=stats.commandesAujourdhui%></div><div class="stat-label">Commandes aujourd'hui</div></div></div>
+    <div class="stat-card s-rouge"><div class="stat-icon" style="background:#FFCCD5">⏳</div><div><div class="stat-value"><%=stats.commandesEnAttente%></div><div class="stat-label">En attente</div></div></div>
+    <div class="stat-card s-bleu"><div class="stat-icon" style="background:#DBF0FA">💰</div><div><div class="stat-value"><%=stats.caAujourdhui.toLocaleString('fr-FR')%></div><div class="stat-label">FCFA aujourd'hui</div></div></div>
   </div>
-
   <div class="dashboard-grid">
-    <!-- QR Code -->
     <div class="card qr-card">
-      <div class="card-header">
-        <h2 class="card-title">Votre QR Code</h2>
-        <span class="card-badge online">● En ligne</span>
-      </div>
-      <div class="qr-wrapper">
-        <img src="<%= qrDataUrl %>" alt="QR Code Menu" class="qr-image"/>
-      </div>
-      <p class="qr-url"><%= menuUrl %></p>
+      <div class="card-header"><h2 class="card-title">📱 Votre QR Code</h2><span class="live-indicator"><span class="live-dot"></span>En ligne</span></div>
+      <div class="qr-wrapper"><img src="<%=qrDataUrl%>" alt="QR Code" class="qr-image"/></div>
+      <p class="qr-url"><%=menuUrl%></p>
       <div class="qr-actions">
-        <a href="<%= qrDataUrl %>" download="qrcode-<%= restaurant.nom.replace(/\s/g,'-') %>.png" class="btn-qr-download">
-          ⬇️ Télécharger PNG
-        </a>
-        <a href="<%= menuUrl %>" target="_blank" class="btn-qr-open">
-          🔗 Ouvrir le menu
-        </a>
+        <a href="<%=qrDataUrl%>" download="qrcode-<%=restaurant.nom.replace(/\s/g,'-')%>.png" class="btn-qr-download">⬇️ Télécharger</a>
+        <a href="<%=menuUrl%>" target="_blank" class="btn-qr-open">🔗 Ouvrir</a>
       </div>
-      <p class="qr-tip">💡 Imprimez ce QR code et collez-le sur vos tables</p>
+      <p class="qr-tip">💡 Imprimez et collez sur vos tables</p>
     </div>
-
-    <!-- Commandes récentes -->
-    <div class="card commandes-card">
-      <div class="card-header">
-        <h2 class="card-title">Commandes récentes</h2>
-        <a href="/commandes" class="card-link">Voir tout →</a>
-      </div>
-      <% if(commandesRecentes.length === 0) { %>
-        <div class="empty-state">
-          <div class="empty-icon">🛒</div>
-          <p>Aucune commande pour l'instant.</p>
-          <p class="empty-sub">Partagez votre QR code pour recevoir vos premières commandes !</p>
-        </div>
+    <div class="card">
+      <div class="card-header"><h2 class="card-title">📦 Commandes récentes</h2><a href="/commandes" class="card-link">Voir tout →</a></div>
+      <% if(commandesRecentes.length===0){ %>
+        <div class="empty-state"><div class="empty-icon">🛒</div><p style="color:var(--gris)">Aucune commande pour l'instant.</p><p class="empty-sub">Partagez votre QR code pour recevoir vos premières commandes !</p></div>
       <% } else { %>
         <div class="commandes-list">
-          <% commandesRecentes.forEach(cmd => { %>
+          <% commandesRecentes.forEach(cmd=>{ %>
             <div class="commande-row">
-              <div class="commande-info">
-                <span class="commande-client"><%= cmd.client_nom %></span>
-                <span class="commande-items"><%= cmd.items.length %> article(s) · <%= cmd.total.toLocaleString('fr-FR') %> FCFA</span>
-                <span class="commande-time"><%= new Date(cmd.createdAt).toLocaleString('fr-FR', {hour:'2-digit',minute:'2-digit'}) %></span>
+              <div>
+                <div class="commande-client"><%=cmd.client_nom%> <% if(cmd.type_livraison==='livraison'){%><span style="font-size:11px;color:var(--bleu)">🛵</span><%}%></div>
+                <div class="commande-items"><%=cmd.items.length%> article(s) · <%=cmd.total.toLocaleString('fr-FR')%> FCFA</div>
+                <div class="commande-time"><%=new Date(cmd.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})%></div>
               </div>
-              <span class="statut-badge statut-<%= cmd.statut %>">
-                <%= cmd.statut === 'en_attente' ? '⏳ En attente' :
-                    cmd.statut === 'en_preparation' ? '👨‍🍳 En préparation' :
-                    cmd.statut === 'servie' ? '✅ Servie' : '❌ Annulée' %>
-              </span>
+              <span class="statut-badge statut-<%=cmd.statut%>"><%=cmd.statut==='en_attente'?'⏳ En attente':cmd.statut==='en_preparation'?'👨‍🍳 Préparation':cmd.statut==='en_livraison'?'🛵 Livraison':cmd.statut==='servie'||cmd.statut==='livree'?'✅ Servie':'❌ Annulée'%></span>
             </div>
           <% }); %>
         </div>
       <% } %>
     </div>
-
-    <!-- Menu rapide -->
-    <div class="card quick-card">
-      <h2 class="card-title">Actions rapides</h2>
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:1rem">⚡ Actions rapides</h2>
       <div class="quick-actions">
-        <a href="/plats/nouveau" class="quick-btn">
-          <span class="quick-icon">➕</span>
-          <span>Ajouter un plat</span>
-        </a>
-        <a href="/plats" class="quick-btn">
-          <span class="quick-icon">📋</span>
-          <span>Gérer mon menu</span>
-        </a>
-        <a href="/commandes" class="quick-btn">
-          <span class="quick-icon">📦</span>
-          <span>Voir les commandes</span>
-        </a>
-        <a href="/dashboard/profil" class="quick-btn">
-          <span class="quick-icon">⚙️</span>
-          <span>Mon profil</span>
-        </a>
+        <a href="/plats/nouveau" class="quick-btn"><span class="quick-icon">➕</span><span>Ajouter un plat</span></a>
+        <a href="/commandes" class="quick-btn"><span class="quick-icon">📦</span><span>Commandes</span></a>
+        <a href="/analytics" class="quick-btn"><span class="quick-icon">📊</span><span>Analytics</span></a>
+        <a href="/promos/nouvelle" class="quick-btn"><span class="quick-icon">🎁</span><span>Créer promo</span></a>
+        <a href="/livreurs" class="quick-btn"><span class="quick-icon">🛵</span><span>Livreurs</span></a>
+        <a href="/avis" class="quick-btn"><span class="quick-icon">⭐</span><span>Avis clients</span></a>
+        <a href="/dashboard/profil" class="quick-btn"><span class="quick-icon">⚙️</span><span>Mon profil</span></a>
+        <a href="/menu/<%=restaurant._id%>" target="_blank" class="quick-btn"><span class="quick-icon">👁️</span><span>Menu public</span></a>
       </div>
     </div>
   </div>
 </div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-  socket.emit('rejoindre_restaurant', '<%= restaurant._id %>');
-  socket.on('nouvelle_commande', (data) => {
-    const notif = document.createElement('div');
-    notif.className = 'toast-notif';
-    notif.innerHTML = `🛒 <strong>Nouvelle commande !</strong> ${data.commande.client_nom} — ${data.commande.total.toLocaleString('fr-FR')} FCFA`;
-    document.body.appendChild(notif);
-    setTimeout(() => notif.classList.add('show'), 100);
-    setTimeout(() => { notif.classList.remove('show'); setTimeout(() => notif.remove(), 400); }, 5000);
-    // Update counter
-    const badge = document.querySelector('.badge-count');
-    if (badge) badge.textContent = parseInt(badge.textContent || 0) + 1;
-  });
+const socket = io();
+socket.emit('rejoindre_restaurant','<%=restaurant._id%>');
+socket.on('nouvelle_commande',data=>{
+  const n=document.createElement('div');n.className='toast-notif';
+  n.innerHTML=`🛒 <strong>Nouvelle commande !</strong> ${data.commande.client_nom} — ${data.commande.total.toLocaleString('fr-FR')} FCFA`;
+  document.body.appendChild(n);setTimeout(()=>n.classList.add('show'),50);setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400);},6000);
+});
 </script>
 <script src="/js/navbar.js"></script>
-</body>
-</html>
+</body></html>

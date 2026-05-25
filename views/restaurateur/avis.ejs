@@ -1,0 +1,273 @@
+<%- include('../partials/head', { title: 'Avis clients' }) %>
+
+<link rel="stylesheet" href="/css/dashboard.css"/>
+
+<%- include('../partials/navbar', { activePage: 'avis' }) %>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="page-title">
+        ⭐ Avis clients
+      </h1>
+
+      <p class="page-sub">
+        <%= total %> avis · Note moyenne : <%= moyenne %>/5
+      </p>
+
+    </div>
+
+  </div>
+
+  <% if(success && success.length > 0){ %>
+
+    <div class="alert alert-success">
+      <%= success %>
+    </div>
+
+  <% } %>
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:1fr 280px;
+      gap:1.5rem;
+      align-items:start
+    "
+  >
+
+    <!-- LISTE DES AVIS -->
+    <div>
+
+      <% if(avis.length === 0){ %>
+
+        <div class="empty-page">
+
+          <div class="empty-icon-lg">⭐</div>
+
+          <h2>Aucun avis</h2>
+
+          <p style="color:var(--gris)">
+            Les avis de vos clients apparaîtront ici.
+          </p>
+
+        </div>
+
+      <% } else { %>
+
+        <% avis.forEach(a => { %>
+
+          <div class="avis-card">
+
+            <div class="avis-header">
+
+              <div>
+
+                <div class="avis-client">
+                  <%= a.client_nom %>
+                </div>
+
+                <div
+                  class="stars"
+                  style="margin-top:4px"
+                >
+
+                  <% for(let i = 1; i <= 5; i++){ %>
+
+                    <span class="star star-sm <%= i <= a.note ? 'active' : '' %>">
+                      ★
+                    </span>
+
+                  <% } %>
+
+                </div>
+
+              </div>
+
+              <div class="avis-date">
+
+                <%= new Date(a.createdAt).toLocaleDateString(
+                  'fr-FR',
+                  {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                  }
+                ) %>
+
+              </div>
+
+            </div>
+
+            <% if(a.texte){ %>
+
+              <p class="avis-texte">
+                <%= a.texte %>
+              </p>
+
+            <% } %>
+
+            <% if(a.reponse){ %>
+
+              <div class="avis-reponse">
+
+                🍽️ <strong>Votre réponse :</strong>
+
+                <%= a.reponse %>
+
+              </div>
+
+            <% } else { %>
+
+              <form
+                method="POST"
+                action="/avis/<%= a._id %>/repondre"
+                style="margin-top:10px;display:flex;gap:8px"
+              >
+
+                <input
+                  type="text"
+                  name="reponse"
+                  placeholder="Répondre à cet avis..."
+                  style="
+                    flex:1;
+                    padding:8px 12px;
+                    border:1.5px solid var(--border);
+                    border-radius:8px;
+                    font-size:13px;
+                    outline:none
+                  "
+                  required
+                />
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm"
+                >
+                  Répondre
+                </button>
+
+              </form>
+
+            <% } %>
+
+          </div>
+
+        <% }); %>
+
+      <% } %>
+
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div class="card">
+
+      <h2
+        class="card-title"
+        style="margin-bottom:1.25rem"
+      >
+        📊 Distribution
+      </h2>
+
+      <div
+        style="
+          text-align:center;
+          margin-bottom:1.5rem
+        "
+      >
+
+        <div
+          style="
+            font-family:'Syne',sans-serif;
+            font-size:3rem;
+            font-weight:800;
+            color:var(--or)
+          "
+        >
+          <%= moyenne %>
+        </div>
+
+        <div
+          class="stars"
+          style="justify-content:center;margin:4px 0"
+        >
+
+          <% for(let i = 1; i <= 5; i++){ %>
+
+            <span class="star <%= i <= Math.round(moyenne) ? 'active' : '' %>">
+              ★
+            </span>
+
+          <% } %>
+
+        </div>
+
+        <div style="font-size:13px;color:var(--gris)">
+          <%= total %> avis
+        </div>
+
+      </div>
+
+      <% distrib.forEach(d => { %>
+
+        <% const pct = total > 0
+          ? Math.round((d.count / total) * 100)
+          : 0;
+        %>
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:8px;
+            font-size:13px
+          "
+        >
+
+          <span style="min-width:18px;color:var(--jaune)">
+            <%= d.note %>★
+          </span>
+
+          <div
+            style="
+              flex:1;
+              height:8px;
+              background:var(--border);
+              border-radius:4px;
+              overflow:hidden
+            "
+          >
+
+            <div
+              style="
+                height:100%;
+                width:<%= pct %>%;
+                background:var(--jaune);
+                border-radius:4px
+              "
+            ></div>
+
+          </div>
+
+          <span style="min-width:28px;color:var(--gris)">
+            <%= d.count %>
+          </span>
+
+        </div>
+
+      <% }); %>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="/js/navbar.js"></script>
+
+</body>
+</html>

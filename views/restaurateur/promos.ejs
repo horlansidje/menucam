@@ -1,0 +1,68 @@
+<%- include('../partials/head',{title:'Promotions'}) %>
+<link rel="stylesheet" href="/css/dashboard.css"/>
+<%- include('../partials/navbar',{activePage:'promos'}) %>
+<div class="page-wrapper">
+  <div class="page-header"><div><h1 class="page-title">🎁 Codes promo</h1><p class="page-sub"><%=promos.length%> promo(s) créée(s)</p></div></div>
+  <% if(error&&error.length>0){%><div class="alert alert-error"><%=error%></div><%}%>
+  <% if(success&&success.length>0){%><div class="alert alert-success"><%=success%></div><%}%>
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start">
+    <div>
+      <% if(promos.length===0){ %>
+        <div class="empty-page"><div class="empty-icon-lg">🎁</div><h2>Aucune promotion</h2><p style="color:var(--gris)">Créez des codes promo pour fidéliser vos clients.</p></div>
+      <% } else { %>
+        <div class="promos-grid">
+          <% promos.forEach(p=>{ const expire = p.date_fin&&new Date()>new Date(p.date_fin); %>
+            <div class="promo-card">
+              <div class="promo-head" style="background:<%=!p.actif||expire?'var(--gris)':'var(--vert)'%>">
+                <div class="promo-code"><%=p.code%></div>
+                <span style="font-size:12px;font-weight:600;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:20px"><%=!p.actif?'Inactif':expire?'Expiré':'Actif'%></span>
+              </div>
+              <div class="promo-body">
+                <div class="promo-detail"><span>Réduction</span><strong style="color:var(--or)"><%=p.type==='pourcentage'?p.valeur+'%':p.valeur.toLocaleString('fr-FR')+' FCFA'%></strong></div>
+                <div class="promo-detail"><span>Utilisations</span><span><%=p.utilisations%>/<%=p.max_utilisations%></span></div>
+                <% if(p.min_commande>0){%><div class="promo-detail"><span>Minimum</span><span><%=p.min_commande.toLocaleString('fr-FR')%> FCFA</span></div><%}%>
+                <% if(p.date_fin){%><div class="promo-detail"><span>Expire le</span><span><%=new Date(p.date_fin).toLocaleDateString('fr-FR')%></span></div><%}%>
+                <% if(p.description){%><p style="font-size:12px;color:var(--gris);margin-top:8px"><%=p.description%></p><%}%>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button onclick="togglePromo('<%=p._id%>',this)" class="btn btn-outline btn-sm" style="flex:1"><%=p.actif?'⏸️ Désactiver':'▶️ Activer'%></button>
+                  <form method="POST" action="/promos/<%=p._id%>/supprimer" onsubmit="return confirm('Supprimer ?')"><button class="btn btn-danger btn-sm">🗑️</button></form>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:1.25rem">➕ Nouvelle promotion</h2>
+      <form method="POST" action="/promos/nouvelle">
+        <div class="form-group"><label>Code promo *</label><input type="text" name="code" placeholder="Ex: BIENVENUE20" required style="text-transform:uppercase"/></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type *</label>
+            <select name="type">
+              <option value="pourcentage">Pourcentage (%)</option>
+              <option value="fixe">Montant fixe (FCFA)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Valeur *</label><input type="number" name="valeur" placeholder="Ex: 20" min="1" required/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Commande min. (FCFA)</label><input type="number" name="min_commande" placeholder="0" min="0"/></div>
+          <div class="form-group"><label>Max utilisations</label><input type="number" name="max_utilisations" placeholder="999" min="1"/></div>
+        </div>
+        <div class="form-group"><label>Date d'expiration</label><input type="date" name="date_fin"/></div>
+        <div class="form-group"><label>Description</label><input type="text" name="description" placeholder="Ex: Bienvenue nouveaux clients"/></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">🎁 Créer le code promo</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+async function togglePromo(id, btn) {
+  const r = await fetch(`/promos/${id}/toggle`,{method:'POST'}).then(r=>r.json());
+  btn.textContent = r.actif ? '⏸️ Désactiver' : '▶️ Activer';
+}
+</script>
+<script src="/js/navbar.js"></script>
+</body></html>

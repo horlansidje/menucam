@@ -1,138 +1,645 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menu — <%= restaurant.nom %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+
+  <title><%= restaurant.nom %> — Menu</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
   <link rel="stylesheet" href="/css/menu-client.css"/>
-  <meta name="theme-color" content="#1a1a2e"/>
+
+  <meta name="theme-color" content="#1A1209"/>
 </head>
+
 <body>
 
-<!-- Header restaurant -->
 <header class="menu-header">
-  <div class="header-bg"></div>
+
+  <div class="header-wax"></div>
+
   <div class="header-content">
-    <% if(restaurant.logo) { %>
-      <img src="<%= restaurant.logo %>" alt="<%= restaurant.nom %>" class="resto-logo"/>
+
+    <% if(restaurant.logo){ %>
+
+      <img
+        src="<%= restaurant.logo %>"
+        alt="<%= restaurant.nom %>"
+        class="resto-logo"
+      />
+
     <% } else { %>
-      <div class="resto-logo-placeholder">🍽️</div>
+
+      <div class="resto-logo-placeholder">
+        🍽️
+      </div>
+
     <% } %>
+
     <div class="resto-info">
-      <h1 class="resto-name"><%= restaurant.nom %></h1>
-      <% if(restaurant.adresse || restaurant.ville) { %>
-        <p class="resto-adresse">📍 <%= [restaurant.adresse, restaurant.ville].filter(Boolean).join(', ') %></p>
+
+      <h1 class="resto-name">
+        <%= restaurant.nom %>
+      </h1>
+
+      <% if(restaurant.adresse || restaurant.ville){ %>
+
+        <span class="resto-adresse">
+
+          📍
+
+          <%= [restaurant.adresse, restaurant.ville]
+                .filter(Boolean)
+                .join(', ')
+          %>
+
+        </span>
+
       <% } %>
-      <% if(restaurant.telephone) { %>
-        <a href="tel:<%= restaurant.telephone %>" class="resto-tel">📞 <%= restaurant.telephone %></a>
+
+      <% if(restaurant.telephone){ %>
+
+        <a
+          href="tel:<%= restaurant.telephone %>"
+          class="resto-tel"
+        >
+          📞 <%= restaurant.telephone %>
+        </a>
+
       <% } %>
-      <% if(restaurant.description) { %>
-        <p class="resto-desc"><%= restaurant.description %></p>
+
+      <% if(restaurant.description){ %>
+
+        <p class="resto-desc">
+          <%= restaurant.description %>
+        </p>
+
       <% } %>
+
+      <% if(restaurant.note_moyenne){ %>
+
+        <div class="resto-rating">
+
+          <span class="rating-val">
+            ⭐ <%= restaurant.note_moyenne %>
+          </span>
+
+          <span class="rating-count">
+            (<%= restaurant.nb_avis || 0 %> avis)
+          </span>
+
+        </div>
+
+      <% } %>
+
     </div>
+
   </div>
+
 </header>
 
-<!-- Navigation catégories -->
-<% const catNames = Object.keys(categories); %>
-<% if(catNames.length > 0) { %>
-<nav class="cat-nav" id="catNav">
-  <% catNames.forEach((cat, i) => { %>
-    <button class="cat-btn <%= i===0?'active':'' %>" onclick="scrollTocat('<%= cat %>')"><%= cat %></button>
-  <% }); %>
-</nav>
+<%
+  const catNames = Object.keys(categories);
+%>
+
+<% if(catNames.length > 0){ %>
+
+  <nav class="cat-nav" id="catNav">
+
+    <% catNames.forEach((cat, i) => { %>
+
+      <button
+        class="cat-btn <%= i === 0 ? 'active' : '' %>"
+        onclick="scrollToCat('<%= cat %>')"
+      >
+        <%= cat %>
+      </button>
+
+    <% }); %>
+
+  </nav>
+
 <% } %>
 
-<!-- Menu items -->
 <main class="menu-main">
-  <% if(catNames.length === 0) { %>
+
+  <% if(catNames.length === 0){ %>
+
     <div class="menu-empty">
-      <div class="empty-icon">🍽️</div>
-      <p>Le menu sera disponible bientôt.</p>
+
+      <div style="font-size:3rem;margin-bottom:1rem">
+        🍽️
+      </div>
+
+      <p>
+        Le menu sera disponible bientôt.
+      </p>
+
     </div>
+
   <% } else { %>
+
     <% catNames.forEach(cat => { %>
-      <section class="menu-section" id="cat-<%= cat.replace(/\s/g,'-') %>" data-cat="<%= cat %>">
-        <h2 class="cat-title"><%= cat %></h2>
+
+      <section
+        class="menu-section"
+        id="cat-<%= cat.replace(/\s/g,'-') %>"
+        data-cat="<%= cat %>"
+      >
+
+        <h2 class="cat-title">
+          <%= cat %>
+        </h2>
+
         <div class="plats-list">
+
           <% categories[cat].forEach(plat => { %>
-            <div class="plat-item" onclick="ajouterAuPanier('<%= plat._id %>', '<%= plat.nom.replace(/'/g,"\\'") %>', <%= plat.prix %>)">
+
+            <div
+              class="plat-item"
+              onclick="ajouterAuPanier(
+                '<%= plat._id %>',
+                '<%= plat.nom.replace(/'/g, '\\\\\'') %>',
+                <%= plat.promo_prix || plat.prix %>
+              )"
+            >
+
               <div class="plat-info">
-                <h3 class="plat-nom"><%= plat.nom %></h3>
-                <% if(plat.description) { %>
-                  <p class="plat-desc"><%= plat.description %></p>
+
+                <h3 class="plat-nom">
+                  <%= plat.nom %>
+                </h3>
+
+                <% if(plat.description){ %>
+
+                  <p class="plat-desc">
+                    <%= plat.description %>
+                  </p>
+
                 <% } %>
-                <span class="plat-prix"><%= plat.prix.toLocaleString('fr-FR') %> FCFA</span>
+
+                <div class="plat-prix">
+
+                  <% if(plat.promo_prix){ %>
+
+                    <span class="promo-prix">
+                      <%= plat.prix.toLocaleString('fr-FR') %> F
+                    </span>
+
+                  <% } %>
+
+                  <%= (plat.promo_prix || plat.prix)
+                        .toLocaleString('fr-FR')
+                  %> FCFA
+
+                </div>
+
               </div>
-              <% if(plat.photo) { %>
-                <div class="plat-photo-wrap">
-                  <img src="<%= plat.photo %>" alt="<%= plat.nom %>" class="plat-photo" loading="lazy"/>
-                  <button class="add-btn" id="btn-<%= plat._id %>">+</button>
-                </div>
-              <% } else { %>
-                <div class="plat-photo-wrap no-photo">
-                  <button class="add-btn" id="btn-<%= plat._id %>">+</button>
-                </div>
-              <% } %>
+
+              <div class="plat-photo-wrap <%= !plat.photo ? 'no-photo' : '' %>">
+
+                <% if(plat.photo){ %>
+
+                  <img
+                    src="<%= plat.photo %>"
+                    alt="<%= plat.nom %>"
+                    class="plat-photo"
+                    loading="lazy"
+                  />
+
+                <% } %>
+
+                <% if(plat.promo_prix){ %>
+
+                  <span class="promo-badge-item">
+                    PROMO
+                  </span>
+
+                <% } %>
+
+                <button
+                  class="add-btn"
+                  id="btn-<%= plat._id %>"
+                >
+                  +
+                </button>
+
+              </div>
+
             </div>
+
           <% }); %>
+
         </div>
+
       </section>
+
     <% }); %>
+
+    <!-- AVIS -->
+    <% if(avis && avis.length > 0){ %>
+
+      <section style="margin-bottom:2rem">
+
+        <h2 class="cat-title">
+          ⭐ Avis clients
+        </h2>
+
+        <div class="avis-section" style="padding:0">
+
+          <% avis.slice(0,3).forEach(a => { %>
+
+            <div class="avis-card-pub">
+
+              <div class="avis-header-pub">
+
+                <div>
+
+                  <div class="avis-nom-pub">
+                    <%= a.client_nom %>
+                  </div>
+
+                  <div class="stars">
+
+                    <% for(let i = 1; i <= 5; i++){ %>
+
+                      <span
+                        class="star star-sm <%= i <= a.note ? 'active' : '' %>"
+                      >
+                        ★
+                      </span>
+
+                    <% } %>
+
+                  </div>
+
+                </div>
+
+                <div style="font-size:12px;color:#9a8a7a">
+
+                  <%= new Date(a.createdAt)
+                        .toLocaleDateString('fr-FR')
+                  %>
+
+                </div>
+
+              </div>
+
+              <% if(a.texte){ %>
+
+                <p
+                  style="
+                    font-size:13px;
+                    color:#6b6154;
+                    line-height:1.6
+                  "
+                >
+                  <%= a.texte %>
+                </p>
+
+              <% } %>
+
+              <% if(a.reponse){ %>
+
+                <div
+                  style="
+                    background:#f5e6d0;
+                    padding:8px 12px;
+                    border-radius:8px;
+                    font-size:12px;
+                    color:#6b4226;
+                    margin-top:8px;
+                    border-left:3px solid #e07b39
+                  "
+                >
+
+                  🍽️ <%= a.reponse %>
+
+                </div>
+
+              <% } %>
+
+            </div>
+
+          <% }); %>
+
+        </div>
+
+      </section>
+
+    <% } %>
+
   <% } %>
+
 </main>
 
-<!-- Panier flottant -->
-<div class="panier-bar" id="panierBar" style="display:none">
+<!-- PANIER -->
+<div
+  class="panier-bar"
+  id="panierBar"
+  style="display:none"
+>
+
   <div class="panier-summary">
-    <span class="panier-count" id="panierCount">0 article</span>
-    <span class="panier-total" id="panierTotal">0 FCFA</span>
+
+    <span
+      class="panier-count"
+      id="panierCount"
+    >
+      0 article
+    </span>
+
+    <span
+      class="panier-total"
+      id="panierTotal"
+    >
+      0 FCFA
+    </span>
+
   </div>
-  <button class="panier-btn" onclick="ouvrirPanier()">Voir le panier →</button>
+
+  <button
+    class="panier-btn"
+    onclick="ouvrirPanier()"
+  >
+    🛒 Mon panier
+  </button>
+
 </div>
 
-<!-- Modal panier -->
-<div class="panier-overlay" id="panierOverlay" style="display:none">
+<!-- MODAL PANIER -->
+<div
+  class="panier-overlay"
+  id="panierOverlay"
+  style="display:none"
+>
+
   <div class="panier-modal">
+
     <div class="panier-header">
-      <h2>Mon panier</h2>
-      <button class="panier-close" onclick="fermerPanier()">✕</button>
-    </div>
-    <div class="panier-items" id="panierItems"></div>
-    <div class="panier-footer">
-      <div class="panier-infos">
-        <div class="panier-info-row">
-          <label>Votre prénom</label>
-          <input type="text" id="clientNom" placeholder="Ex: Jean-Paul" class="panier-input"/>
-        </div>
-        <div class="panier-info-row">
-          <label>N° de table (optionnel)</label>
-          <input type="text" id="clientTable" placeholder="Ex: 5" class="panier-input"/>
-        </div>
-        <div class="panier-info-row">
-          <label>Note (optionnel)</label>
-          <input type="text" id="clientNote" placeholder="Ex: sans piment" class="panier-input"/>
-        </div>
-      </div>
-      <div class="panier-total-row">
-        <span>Total</span>
-        <span class="total-amount" id="panierTotalModal">0 FCFA</span>
-      </div>
-      <button class="btn-commander-whatsapp" onclick="commanderWhatsApp()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Commander via WhatsApp
+
+      <h2>🛒 Mon panier</h2>
+
+      <button
+        class="panier-close"
+        onclick="fermerPanier()"
+      >
+        ✕
       </button>
+
     </div>
+
+    <div
+      class="panier-items"
+      id="panierItems"
+    ></div>
+
+    <div class="panier-footer">
+
+  <!-- TYPE LIVRAISON -->
+  <p
+    style="
+      font-size:13px;
+      font-weight:600;
+      color:var(--gris);
+      margin-bottom:8px
+    "
+  >
+    Type de commande
+  </p>
+
+  <div class="delivery-options">
+
+    <div
+      class="delivery-opt selected"
+      data-type="sur_place"
+      onclick="selectDelivery(this,'sur_place')"
+    >
+      <div class="opt-icon">🪑</div>
+      <div class="opt-label">Sur place</div>
+    </div>
+
+    <div
+      class="delivery-opt"
+      data-type="a_emporter"
+      onclick="selectDelivery(this,'a_emporter')"
+    >
+      <div class="opt-icon">🛍️</div>
+      <div class="opt-label">À emporter</div>
+    </div>
+
+    <div
+      class="delivery-opt"
+      data-type="livraison"
+      onclick="selectDelivery(this,'livraison')"
+    >
+      <div class="opt-icon">🛵</div>
+      <div class="opt-label">Livraison</div>
+    </div>
+
   </div>
+
+  <!-- INFOS CLIENT -->
+  <div class="panier-infos">
+
+    <div class="panier-info-row">
+      <label>Votre prénom</label>
+
+      <input
+        type="text"
+        id="clientNom"
+        placeholder="Ex: Jean-Paul"
+        class="panier-input"
+      />
+    </div>
+
+    <div class="panier-info-row">
+      <label>Téléphone</label>
+
+      <input
+        type="tel"
+        id="clientTel"
+        placeholder="6XX XXX XXX"
+        class="panier-input"
+      />
+    </div>
+
+    <div
+      class="panier-info-row"
+      id="tableRow"
+    >
+      <label>N° de table</label>
+
+      <input
+        type="text"
+        id="clientTable"
+        placeholder="Ex: 5"
+        class="panier-input"
+      />
+    </div>
+
+    <div
+      class="panier-info-row"
+      id="adresseRow"
+      style="display:none"
+    >
+      <label>Adresse de livraison</label>
+
+      <input
+        type="text"
+        id="clientAdresse"
+        placeholder="Ex: Rue de la Joie"
+        class="panier-input"
+      />
+    </div>
+
+    <div
+      class="panier-info-row"
+      id="quartierRow"
+      style="display:none"
+    >
+      <label>Quartier</label>
+
+      <input
+        type="text"
+        id="clientQuartier"
+        placeholder="Ex: Akwa"
+        class="panier-input"
+      />
+    </div>
+
+    <div class="panier-info-row">
+      <label>Note spéciale</label>
+
+      <input
+        type="text"
+        id="clientNote"
+        placeholder="Sans piment..."
+        class="panier-input"
+      />
+    </div>
+
+  </div>
+
+  <!-- CODE PROMO -->
+  <div class="promo-row">
+
+    <input
+      type="text"
+      id="promoCode"
+      placeholder="Code promo"
+      class="panier-input"
+      style="text-transform:uppercase"
+    />
+
+    <button
+      onclick="verifierPromo()"
+      class="btn"
+      style="
+        background:var(--vert);
+        color:#fff;
+        padding:10px 16px;
+        border-radius:8px;
+        border:none;
+        cursor:pointer;
+        font-weight:600
+      "
+    >
+      Appliquer
+    </button>
+
+  </div>
+
+  <div
+    id="promoMsg"
+    style="
+      font-size:13px;
+      margin-bottom:10px;
+      min-height:18px
+    "
+  ></div>
+
+  <!-- RECAP -->
+  <div
+    class="panier-recap"
+    id="panierRecap"
+  ></div>
+
+  <!-- PAIEMENT -->
+  <p class="payment-label">
+    Mode de paiement
+  </p>
+
+  <div class="payment-options">
+
+    <div
+      class="pay-opt selected"
+      data-pay="whatsapp"
+      onclick="selectPay(this,'whatsapp')"
+    >
+      <div class="pay-icon">💬</div>
+      <div class="pay-label">WhatsApp</div>
+    </div>
+
+    <div
+      class="pay-opt"
+      data-pay="mtn"
+      onclick="selectPay(this,'mtn')"
+    >
+      <div class="pay-icon">📱</div>
+      <div class="pay-label">MTN Money</div>
+    </div>
+
+    <div
+      class="pay-opt"
+      data-pay="orange"
+      onclick="selectPay(this,'orange')"
+    >
+      <div class="pay-icon">🟠</div>
+      <div class="pay-label">Orange</div>
+    </div>
+
+  </div>
+
+  <!-- BTN COMMANDER -->
+  <button
+    class="btn-commander whatsapp"
+    id="btnCommander"
+    onclick="commander()"
+  >
+    🛒 Commander via WhatsApp
+  </button>
+
+</div>
+
+  </div>
+
 </div>
 
 <script>
-  const RESTAURANT_ID  = '<%= restaurant._id %>';
-  const RESTAURANT_TEL = '<%= restaurant.telephone ? restaurant.telephone.replace(/\s/g,"") : "" %>';
-  const RESTAURANT_NOM = '<%= restaurant.nom.replace(/'/g,"\\'" ) %>';
+
+const RESTAURANT_ID =
+  '<%= restaurant._id %>';
+
+const RESTAURANT_TEL =
+  '<%= restaurant.telephone
+      ? restaurant.telephone.replace(/\s/g,"")
+      : ""
+  %>';
+
+const RESTAURANT_NOM =
+  '<%= restaurant.nom.replace(/'/g,"\\\\'") %>';
+
 </script>
+
 <script src="/js/menu-client.js"></script>
+
 </body>
 </html>

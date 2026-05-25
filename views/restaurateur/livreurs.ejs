@@ -1,0 +1,265 @@
+<%- include('../partials/head', { title: 'Livreurs' }) %>
+
+<link rel="stylesheet" href="/css/dashboard.css"/>
+
+<%- include('../partials/navbar', { activePage: 'livreurs' }) %>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🛵 Gestion des livreurs</h1>
+
+      <p class="page-sub">
+        <%= livreurs.length %> livreur(s) enregistré(s)
+      </p>
+    </div>
+  </div>
+
+  <% if(error && error.length > 0){ %>
+
+    <div class="alert alert-error">
+      <%= error %>
+    </div>
+
+  <% } %>
+
+  <% if(success && success.length > 0){ %>
+
+    <div class="alert alert-success">
+      <%= success %>
+    </div>
+
+  <% } %>
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:1fr 340px;
+      gap:1.5rem;
+      align-items:start
+    "
+  >
+
+    <!-- LISTE DES LIVREURS -->
+    <div>
+
+      <% if(livreurs.length === 0){ %>
+
+        <div class="empty-page">
+
+          <div class="empty-icon-lg">🛵</div>
+
+          <h2>Aucun livreur</h2>
+
+          <p style="color:var(--gris)">
+            Ajoutez vos livreurs pour gérer les livraisons.
+          </p>
+
+        </div>
+
+      <% } else { %>
+
+        <div class="livreurs-grid">
+
+          <% livreurs.forEach(l => { %>
+
+            <div class="livreur-card">
+
+              <div class="livreur-avatar">🛵</div>
+
+              <div class="livreur-info">
+
+                <strong>
+                  <%= l.nom %>
+                </strong>
+
+                <span>
+                  📞 <%= l.telephone %>
+                </span>
+
+                <% if(l.moto){ %>
+
+                  <span>
+                    🏍️ <%= l.moto %>
+                  </span>
+
+                <% } %>
+
+                <% if(l.zone){ %>
+
+                  <span>
+                    📍 <%= l.zone %>
+                  </span>
+
+                <% } %>
+
+                <span style="font-size:12px;color:var(--gris)">
+                  ✅ <%= l.commandes_livrees || 0 %> livraisons
+                </span>
+
+              </div>
+
+              <div class="livreur-status">
+
+                <select
+                  onchange="changerStatut('<%= l._id %>', this.value)"
+                  style="
+                    font-size:12px;
+                    padding:5px 8px;
+                    border:1px solid var(--border);
+                    border-radius:8px;
+                    background:var(--blanc)
+                  "
+                >
+
+                  <option
+                    value="disponible"
+                    <%= l.statut === 'disponible' ? 'selected' : '' %>
+                  >
+                    Disponible
+                  </option>
+
+                  <option
+                    value="occupé"
+                    <%= l.statut === 'occupé' ? 'selected' : '' %>
+                  >
+                    Occupé
+                  </option>
+
+                  <option
+                    value="inactif"
+                    <%= l.statut === 'inactif' ? 'selected' : '' %>
+                  >
+                    Inactif
+                  </option>
+
+                </select>
+
+                <form
+                  method="POST"
+                  action="/livreurs/<%= l._id %>/supprimer"
+                  style="margin-top:6px"
+                  onsubmit="return confirm('Supprimer ?')"
+                >
+
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                    style="width:100%"
+                  >
+                    🗑️
+                  </button>
+
+                </form>
+
+              </div>
+
+            </div>
+
+          <% }); %>
+
+        </div>
+
+      <% } %>
+
+    </div>
+
+    <!-- AJOUT LIVREUR -->
+    <div class="card">
+
+      <h2
+        class="card-title"
+        style="margin-bottom:1.25rem"
+      >
+        ➕ Nouveau livreur
+      </h2>
+
+      <form method="POST" action="/livreurs/nouveau">
+
+        <div class="form-group">
+
+          <label>Nom complet *</label>
+
+          <input
+            type="text"
+            name="nom"
+            placeholder="Ex: Jean-Paul Mbarga"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Téléphone *</label>
+
+          <input
+            type="tel"
+            name="telephone"
+            placeholder="6XX XXX XXX"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Type de moto</label>
+
+          <input
+            type="text"
+            name="moto"
+            placeholder="Ex: Tvs King, Benelli"
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Zone de livraison</label>
+
+          <input
+            type="text"
+            name="zone"
+            placeholder="Ex: Akwa, Bonamoussadi"
+          />
+
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          style="width:100%"
+        >
+          ➕ Ajouter le livreur
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+async function changerStatut(id, statut) {
+
+  await fetch(`/livreurs/${id}/statut`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ statut })
+  });
+
+}
+
+</script>
+
+<script src="/js/navbar.js"></script>
+
+</body>
+</html>

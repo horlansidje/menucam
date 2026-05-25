@@ -1,107 +1,41 @@
-<%- include('../partials/head', {title: 'Mon profil'}) %>
+<%- include('../partials/head',{title:'Mon profil'}) %>
 <link rel="stylesheet" href="/css/dashboard.css"/>
-<%- include('../partials/navbar', {activePage: 'profil'}) %>
-
+<%- include('../partials/navbar',{activePage:'profil'}) %>
 <div class="page-wrapper">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Mon profil</h1>
-      <p class="page-sub">Modifiez les informations de votre restaurant</p>
-    </div>
-  </div>
-
-  <% if(error && error.length > 0) { %>
-    <div class="alert alert-error"><%= error %></div>
-  <% } %>
-  <% if(success && success.length > 0) { %>
-    <div class="alert alert-success"><%= success %></div>
-  <% } %>
-
+  <div class="page-header"><div><h1 class="page-title">⚙️ Mon profil</h1><p class="page-sub">Informations de votre restaurant</p></div></div>
+  <% if(error&&error.length>0){%><div class="alert alert-error"><%=error%></div><%}%>
+  <% if(success&&success.length>0){%><div class="alert alert-success"><%=success%></div><%}%>
   <div class="form-card">
-    <form method="POST" action="/dashboard/profil" enctype="multipart/form-data" class="plat-form">
+    <form method="POST" action="/dashboard/profil" enctype="multipart/form-data">
       <div class="form-grid">
-        <div class="form-left">
-          <div class="form-group">
-            <label>Logo du restaurant</label>
+        <div>
+          <div class="form-group"><label>Logo du restaurant</label>
             <div class="photo-upload" id="photoUpload">
-              <% if(restaurant.logo) { %>
-                <img src="<%= restaurant.logo %>" alt="Logo" id="photoPreview" class="photo-preview"/>
-              <% } else { %>
-                <div class="photo-placeholder" id="photoPlaceholder">
-                  <span class="upload-icon">🍽️</span>
-                  <span>Ajouter votre logo</span>
-                  <span class="upload-sub">JPG, PNG · Max 3 Mo</span>
-                </div>
-                <img id="photoPreview" class="photo-preview" style="display:none"/>
-              <% } %>
+              <%if(restaurant.logo){%><img src="<%=restaurant.logo%>" id="photoPreview" class="photo-preview"/><%}else{%>
+              <div class="photo-placeholder" id="photoPlaceholder"><span class="upload-icon">🍽️</span><span>Ajouter votre logo</span><span class="upload-sub">JPG, PNG · Max 3 Mo</span></div>
+              <img id="photoPreview" class="photo-preview" style="display:none"/><%}%>
               <input type="file" name="logo" id="photoInput" accept="image/*" style="display:none"/>
             </div>
           </div>
-
-          <div class="form-group" style="background:#f8f9fa;padding:1rem;border-radius:12px">
-            <p style="font-size:13px;color:#666;margin:0 0 4px"><strong>Votre lien menu public :</strong></p>
-            <p style="font-size:13px;color:#333;word-break:break-all;margin:0">
-              <%= process.env.BASE_URL || 'http://localhost:3000' %>/menu/<%= restaurant._id %>
-            </p>
-          </div>
         </div>
-
-        <div class="form-right">
-          <div class="form-group">
-            <label>Nom du restaurant *</label>
-            <input type="text" name="nom" value="<%= restaurant.nom %>" required/>
-          </div>
-          <div class="form-group">
-            <label>Téléphone *</label>
-            <input type="tel" name="telephone" value="<%= restaurant.telephone %>" required/>
-          </div>
+        <div>
+          <div class="form-group"><label>Nom *</label><input type="text" name="nom" value="<%=restaurant.nom%>" required/></div>
+          <div class="form-group"><label>Téléphone *</label><input type="tel" name="telephone" value="<%=restaurant.telephone%>" required/></div>
           <div class="form-row">
-            <div class="form-group">
-              <label>Adresse</label>
-              <input type="text" name="adresse" value="<%= restaurant.adresse || '' %>"/>
-            </div>
-            <div class="form-group">
-              <label>Ville</label>
-              <select name="ville">
-                <% ['Douala','Yaoundé','Bafoussam','Bamenda','Garoua','Autre'].forEach(v => { %>
-                  <option value="<%= v %>" <%= restaurant.ville === v ? 'selected' : '' %>><%= v %></option>
-                <% }); %>
-              </select>
-            </div>
+            <div class="form-group"><label>Adresse</label><input type="text" name="adresse" value="<%=restaurant.adresse||''%>"/></div>
+            <div class="form-group"><label>Ville</label><select name="ville"><%['Douala','Yaoundé','Bafoussam','Bamenda','Garoua','Autre'].forEach(v=>{%><option value="<%=v%>" <%=restaurant.ville===v?'selected':''%>><%=v%></option><%});%></select></div>
           </div>
-          <div class="form-group">
-            <label>Description / Spécialités</label>
-            <textarea name="description" rows="3" placeholder="Décrivez votre restaurant, vos spécialités..."><%= restaurant.description || '' %></textarea>
-          </div>
+          <div class="form-group"><label>Description</label><textarea name="description" rows="3"><%=restaurant.description||''%></textarea></div>
         </div>
       </div>
-
-      <div class="form-actions">
-        <a href="/dashboard" class="btn-cancel">Annuler</a>
-        <button type="submit" class="btn-submit-form">💾 Enregistrer les modifications</button>
-      </div>
+      <div class="form-actions"><a href="/dashboard" class="btn btn-outline">Annuler</a><button type="submit" class="btn btn-primary">💾 Enregistrer</button></div>
     </form>
   </div>
 </div>
-
 <script>
-  const photoUpload = document.getElementById('photoUpload');
-  const photoInput  = document.getElementById('photoInput');
-  const photoPreview = document.getElementById('photoPreview');
-  const photoPlaceholder = document.getElementById('photoPlaceholder');
-  photoUpload.addEventListener('click', () => photoInput.click());
-  photoInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      photoPreview.src = ev.target.result;
-      photoPreview.style.display = 'block';
-      if (photoPlaceholder) photoPlaceholder.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-  });
+const pu=document.getElementById('photoUpload'),pi=document.getElementById('photoInput'),pp=document.getElementById('photoPreview'),ph=document.getElementById('photoPlaceholder');
+pu.addEventListener('click',()=>pi.click());
+pi.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pp.src=ev.target.result;pp.style.display='block';if(ph)ph.style.display='none';};r.readAsDataURL(f);});
 </script>
 <script src="/js/navbar.js"></script>
-</body>
-</html>
+</body></html>

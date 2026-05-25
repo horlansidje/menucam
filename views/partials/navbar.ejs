@@ -5,33 +5,21 @@
       <span class="brand-name">MenuCam</span>
     </a>
   </div>
-  <div class="navbar-menu">
-    <a href="/dashboard" class="nav-link <%= typeof activePage !== 'undefined' && activePage==='dashboard' ? 'active' : '' %>">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      Dashboard
+  <div class="navbar-menu" id="navMenu">
+    <a href="/dashboard"  class="nav-link <%= typeof activePage!=='undefined'&&activePage==='dashboard'  ?'active':'' %>">🏠 Dashboard</a>
+    <a href="/plats"      class="nav-link <%= typeof activePage!=='undefined'&&activePage==='plats'      ?'active':'' %>">🍽️ Menu</a>
+    <a href="/commandes"  class="nav-link <%= typeof activePage!=='undefined'&&activePage==='commandes'  ?'active':'' %>">
+      📦 Commandes
+      <% if(typeof stats!=='undefined'&&stats&&stats.enAttente>0){%><span class="badge-count"><%=stats.enAttente%></span><%}%>
     </a>
-    <a href="/plats" class="nav-link <%= typeof activePage !== 'undefined' && activePage==='plats' ? 'active' : '' %>">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Mes plats
-    </a>
-    <a href="/commandes" class="nav-link <%= typeof activePage !== 'undefined' && activePage==='commandes' ? 'active' : '' %>">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
-      Commandes
-      <% if(typeof stats !== 'undefined' && stats.commandesEnAttente > 0) { %>
-        <span class="badge-count"><%= stats.commandesEnAttente %></span>
-      <% } %>
-    </a>
-    <a href="/dashboard/profil" class="nav-link <%= typeof activePage !== 'undefined' && activePage==='profil' ? 'active' : '' %>">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      Profil
-    </a>
+    <a href="/livreurs"   class="nav-link <%= typeof activePage!=='undefined'&&activePage==='livreurs'   ?'active':'' %>">🛵 Livreurs</a>
+    <a href="/promos"     class="nav-link <%= typeof activePage!=='undefined'&&activePage==='promos'     ?'active':'' %>">🎁 Promos</a>
+    <a href="/avis"       class="nav-link <%= typeof activePage!=='undefined'&&activePage==='avis'       ?'active':'' %>">⭐ Avis</a>
+    <a href="/analytics"  class="nav-link <%= typeof activePage!=='undefined'&&activePage==='analytics'  ?'active':'' %>">📊 Analytics</a>
   </div>
   <div class="navbar-right">
-    <span class="restaurant-name"><%= restaurantNom || '' %></span>
+    <span class="resto-name"><%= restaurantNom||'' %></span>
     <a href="/auth/deconnexion" class="btn-logout">Déconnexion</a>
   </div>
-  <button class="nav-toggle" id="navToggle">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
 </nav>
-<div class="nav-overlay" id="navOverlay"></div>

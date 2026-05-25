@@ -9,10 +9,16 @@ const db = {
   restaurants: new Datastore({ filename: path.join(dbPath, 'restaurants.db'), autoload: true }),
   plats:       new Datastore({ filename: path.join(dbPath, 'plats.db'),       autoload: true }),
   commandes:   new Datastore({ filename: path.join(dbPath, 'commandes.db'),   autoload: true }),
+  livreurs:    new Datastore({ filename: path.join(dbPath, 'livreurs.db'),    autoload: true }),
+  promos:      new Datastore({ filename: path.join(dbPath, 'promos.db'),      autoload: true }),
+  avis:        new Datastore({ filename: path.join(dbPath, 'avis.db'),        autoload: true }),
 };
 
 db.restaurants.ensureIndex({ fieldName: 'email', unique: true });
 db.plats.ensureIndex({ fieldName: 'restaurant_id' });
 db.commandes.ensureIndex({ fieldName: 'restaurant_id' });
+db.livreurs.ensureIndex({ fieldName: 'restaurant_id' });
+db.promos.ensureIndex({ fieldName: 'restaurant_id' });
+db.avis.ensureIndex({ fieldName: 'restaurant_id' });
 
 module.exports = db;

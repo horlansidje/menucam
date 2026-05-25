@@ -44,6 +44,17 @@ app.get('/', (req, res) => { if (req.session.restaurantId) return res.redirect('
 app.use((req, res) => res.status(404).render('404'));
 app.use((err, req, res, next) => { console.error(err); res.status(500).send('Erreur serveur'); });
 
+
+// Auto-seed si base vide
+const db = require('./models/db');
+setTimeout(async () => {
+  const count = await db.restaurants.countAsync({});
+  if (count === 0) {
+    console.log('Base vide — lancement du seed...');
+    require('./seed');
+  }
+}, 1000);
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅  MenuCam V2 démarré sur http://localhost:${PORT}\n`);
 });

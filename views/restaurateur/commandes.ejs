@@ -1,112 +1,508 @@
-<%- include('../partials/head', {title: 'Commandes'}) %>
+<%- include('../partials/head', { title: 'Commandes' }) %>
+
 <link rel="stylesheet" href="/css/dashboard.css"/>
-<%- include('../partials/navbar', {activePage: 'commandes'}) %>
+
+<%- include('../partials/navbar', { activePage: 'commandes' }) %>
 
 <div class="page-wrapper">
+
   <div class="page-header">
+
     <div>
-      <h1 class="page-title">Commandes</h1>
-      <p class="page-sub">Gérez et suivez toutes vos commandes en temps réel</p>
+
+      <h1 class="page-title">📦 Commandes</h1>
+
+      <p class="page-sub">
+        Gérez vos commandes en temps réel
+      </p>
+
     </div>
-    <div class="live-indicator"><span class="live-dot"></span> Temps réel</div>
+
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      Temps réel
+    </div>
+
   </div>
 
-  <% if(success && success.length > 0) { %>
-    <div class="alert alert-success"><%= success %></div>
+  <% if(success && success.length > 0){ %>
+
+    <div class="alert alert-success">
+      <%= success %>
+    </div>
+
   <% } %>
 
-  <!-- Stats commandes -->
+  <!-- STATS -->
   <div class="commandes-stats">
-    <div class="cstat en-attente"><span class="cstat-num"><%= stats.enAttente %></span><span>En attente</span></div>
-    <div class="cstat en-prep"><span class="cstat-num"><%= stats.enPreparation %></span><span>En préparation</span></div>
-    <div class="cstat servies"><span class="cstat-num"><%= stats.servies %></span><span>Servies</span></div>
-    <div class="cstat ca"><span class="cstat-num"><%= stats.caTodal.toLocaleString('fr-FR') %></span><span>FCFA aujourd'hui</span></div>
+
+    <div class="cstat s-or">
+      <span class="cstat-num">
+        <%= stats.enAttente %>
+      </span>
+      <span>En attente</span>
+    </div>
+
+    <div class="cstat s-bleu">
+      <span class="cstat-num">
+        <%= stats.enPreparation %>
+      </span>
+      <span>En préparation</span>
+    </div>
+
+    <div class="cstat s-rouge">
+      <span class="cstat-num">
+        <%= stats.enLivraison %>
+      </span>
+      <span>En livraison</span>
+    </div>
+
+    <div class="cstat s-vert">
+      <span class="cstat-num">
+        <%= stats.servies %>
+      </span>
+      <span>Servies</span>
+    </div>
+
+    <div class="cstat s-or">
+      <span class="cstat-num">
+        <%= stats.caTodal.toLocaleString('fr-FR') %>
+      </span>
+      <span>FCFA aujourd'hui</span>
+    </div>
+
   </div>
 
-  <!-- Filtres -->
-  <form method="GET" action="/commandes" class="filters-form">
-    <select name="statut" onchange="this.form.submit()">
-      <option value="toutes"   <%= filtreStatut==='toutes' ? 'selected':'' %>>Toutes les commandes</option>
-      <option value="en_attente"    <%= filtreStatut==='en_attente' ? 'selected':'' %>>⏳ En attente</option>
-      <option value="en_preparation" <%= filtreStatut==='en_preparation' ? 'selected':'' %>>👨‍🍳 En préparation</option>
-      <option value="servie"   <%= filtreStatut==='servie' ? 'selected':'' %>>✅ Servies</option>
-      <option value="annulee"  <%= filtreStatut==='annulee' ? 'selected':'' %>>❌ Annulées</option>
+  <!-- FILTRES -->
+  <form
+    method="GET"
+    action="/commandes"
+    class="filters-form"
+  >
+
+    <select
+      name="statut"
+      onchange="this.form.submit()"
+    >
+
+      <option
+        value="toutes"
+        <%= filtreStatut === 'toutes' ? 'selected' : '' %>
+      >
+        Toutes
+      </option>
+
+      <option
+        value="en_attente"
+        <%= filtreStatut === 'en_attente' ? 'selected' : '' %>
+      >
+        ⏳ En attente
+      </option>
+
+      <option
+        value="en_preparation"
+        <%= filtreStatut === 'en_preparation' ? 'selected' : '' %>
+      >
+        👨‍🍳 Préparation
+      </option>
+
+      <option
+        value="en_livraison"
+        <%= filtreStatut === 'en_livraison' ? 'selected' : '' %>
+      >
+        🛵 Livraison
+      </option>
+
+      <option
+        value="servie"
+        <%= filtreStatut === 'servie' ? 'selected' : '' %>
+      >
+        ✅ Servies
+      </option>
+
+      <option
+        value="annulee"
+        <%= filtreStatut === 'annulee' ? 'selected' : '' %>
+      >
+        ❌ Annulées
+      </option>
+
     </select>
-    <input type="date" name="date" value="<%= filtreDate %>" onchange="this.form.submit()"/>
-    <% if(filtreStatut !== 'toutes' || filtreDate) { %>
-      <a href="/commandes" class="btn-reset-filter">✕ Réinitialiser</a>
-    <% } %>
+
+    <select
+      name="type"
+      onchange="this.form.submit()"
+    >
+
+      <option
+        value="tous"
+        <%= filtreType === 'tous' ? 'selected' : '' %>
+      >
+        Tous types
+      </option>
+
+      <option
+        value="sur_place"
+        <%= filtreType === 'sur_place' ? 'selected' : '' %>
+      >
+        🪑 Sur place
+      </option>
+
+      <option
+        value="a_emporter"
+        <%= filtreType === 'a_emporter' ? 'selected' : '' %>
+      >
+        🛍️ À emporter
+      </option>
+
+      <option
+        value="livraison"
+        <%= filtreType === 'livraison' ? 'selected' : '' %>
+      >
+        🛵 Livraison
+      </option>
+
+    </select>
+
+    <input
+      type="date"
+      name="date"
+      value="<%= filtreDate %>"
+      onchange="this.form.submit()"
+    />
+
   </form>
 
-  <!-- Liste commandes -->
+  <!-- LISTE COMMANDES -->
   <div id="commandesList">
-    <% if(commandes.length === 0) { %>
+
+    <% if(commandes.length === 0){ %>
+
       <div class="empty-page">
+
         <div class="empty-icon-lg">📦</div>
+
         <h2>Aucune commande</h2>
-        <p>Les commandes de vos clients apparaîtront ici en temps réel dès qu'ils scannent votre QR code.</p>
+
+        <p style="color:var(--gris)">
+          Les commandes apparaîtront ici en temps réel.
+        </p>
+
       </div>
+
     <% } else { %>
+
       <% commandes.forEach(cmd => { %>
-        <div class="commande-detail-card" id="cmd-<%= cmd._id %>">
+
+        <div
+          class="commande-detail-card"
+          id="cmd-<%= cmd._id %>"
+        >
+
+          <!-- HEADER -->
           <div class="cmd-header">
+
             <div class="cmd-client">
-              <span class="cmd-icon">👤</span>
+
+              <div class="cmd-icon">
+
+                <%= cmd.type_livraison === 'livraison'
+                  ? '🛵'
+                  : cmd.type_livraison === 'a_emporter'
+                  ? '🛍️'
+                  : '🪑'
+                %>
+
+              </div>
+
               <div>
-                <strong><%= cmd.client_nom %></strong>
-                <% if(cmd.client_table) { %><span class="cmd-table">Table <%= cmd.client_table %></span><% } %>
+
+                <strong>
+                  <%= cmd.client_nom %>
+                </strong>
+
+                <span
+                  style="
+                    font-size:12px;
+                    color:var(--gris);
+                    margin-left:6px
+                  "
+                >
+                  #<%= cmd.num_commande || '' %>
+                </span>
+
+                <% if(cmd.client_table){ %>
+
+                  <span class="cmd-table">
+                    Table <%= cmd.client_table %>
+                  </span>
+
+                <% } %>
+
+                <% if(cmd.client_telephone){ %>
+
+                  <div style="font-size:12px;color:var(--gris)">
+                    📞 <%= cmd.client_telephone %>
+                  </div>
+
+                <% } %>
+
+                <% if(
+                  cmd.type_livraison === 'livraison'
+                  && cmd.client_adresse
+                ){ %>
+
+                  <div style="font-size:12px;color:var(--bleu)">
+
+                    📍 <%= cmd.client_adresse %>
+
+                    <% if(cmd.client_quartier){ %>
+                      — <%= cmd.client_quartier %>
+                    <% } %>
+
+                  </div>
+
+                <% } %>
+
               </div>
+
             </div>
+
             <div class="cmd-meta">
-              <span class="cmd-time">🕐 <%= new Date(cmd.createdAt).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) %></span>
-              <span class="statut-badge statut-<%= cmd.statut %>" id="statut-<%= cmd._id %>">
-                <%= cmd.statut === 'en_attente' ? '⏳ En attente' :
-                    cmd.statut === 'en_preparation' ? '👨‍🍳 En préparation' :
-                    cmd.statut === 'servie' ? '✅ Servie' : '❌ Annulée' %>
+
+              <span class="cmd-time">
+
+                🕐
+
+                <%= new Date(cmd.createdAt).toLocaleString(
+                  'fr-FR',
+                  {
+                    day:'2-digit',
+                    month:'2-digit',
+                    hour:'2-digit',
+                    minute:'2-digit'
+                  }
+                ) %>
+
               </span>
+
+              <span
+                style="
+                  font-size:11px;
+                  background:var(--gris-light);
+                  padding:3px 8px;
+                  border-radius:20px
+                "
+              >
+
+                <%= cmd.paiement === 'mtn'
+                  ? '📱 MTN'
+                  : cmd.paiement === 'orange'
+                  ? '🟠 Orange'
+                  : '💬 WA'
+                %>
+
+              </span>
+
+              <span
+                class="statut-badge statut-<%= cmd.statut %>"
+                id="statut-<%= cmd._id %>"
+              >
+
+                <%= cmd.statut === 'en_attente'
+                  ? '⏳ En attente'
+                  : cmd.statut === 'en_preparation'
+                  ? '👨‍🍳 Préparation'
+                  : cmd.statut === 'en_livraison'
+                  ? '🛵 Livraison'
+                  : cmd.statut === 'servie' || cmd.statut === 'livree'
+                  ? '✅ Servie'
+                  : '❌ Annulée'
+                %>
+
+              </span>
+
             </div>
+
           </div>
 
+          <!-- ITEMS -->
           <div class="cmd-items">
+
             <% cmd.items.forEach(item => { %>
+
               <div class="cmd-item">
-                <span class="item-qty"><%= item.quantite %>×</span>
-                <span class="item-nom"><%= item.nom %></span>
-                <span class="item-prix"><%= (item.prix * item.quantite).toLocaleString('fr-FR') %> FCFA</span>
+
+                <span class="item-qty">
+                  <%= item.quantite %>×
+                </span>
+
+                <span class="item-nom">
+                  <%= item.nom %>
+                </span>
+
+                <span class="item-prix">
+                  <%= (item.prix * item.quantite).toLocaleString('fr-FR') %> F
+                </span>
+
               </div>
+
             <% }); %>
+
           </div>
 
-          <% if(cmd.note) { %>
-            <div class="cmd-note">📝 <em><%= cmd.note %></em></div>
+          <% if(cmd.note){ %>
+
+            <div class="cmd-note">
+              📝 <em><%= cmd.note %></em>
+            </div>
+
           <% } %>
 
-          <div class="cmd-footer">
-            <span class="cmd-total">Total : <strong><%= cmd.total.toLocaleString('fr-FR') %> FCFA</strong></span>
-            <div class="cmd-statut-actions">
-              <% if(cmd.statut === 'en_attente') { %>
-                <button class="btn-statut prep" onclick="changerStatut('<%= cmd._id %>', 'en_preparation', this)">👨‍🍳 Prendre en charge</button>
-                <button class="btn-statut annul" onclick="changerStatut('<%= cmd._id %>', 'annulee', this)">❌ Annuler</button>
-              <% } else if(cmd.statut === 'en_preparation') { %>
-                <button class="btn-statut serve" onclick="changerStatut('<%= cmd._id %>', 'servie', this)">✅ Marquer comme servie</button>
-              <% } %>
-              <form method="POST" action="/commandes/<%= cmd._id %>/supprimer" style="display:inline"
-                onsubmit="return confirm('Supprimer cette commande ?')">
-                <button type="submit" class="btn-statut del">🗑️</button>
-              </form>
+          <% if(cmd.reduction > 0){ %>
+
+            <div
+              style="
+                font-size:13px;
+                color:var(--vert2);
+                margin-bottom:0.5rem
+              "
+            >
+
+              🎁 Promo <%= cmd.promo_code %> :
+              -<%= cmd.reduction.toLocaleString('fr-FR') %> FCFA
+
             </div>
+
+          <% } %>
+
+          <!-- FOOTER -->
+          <div class="cmd-footer">
+
+            <span class="cmd-total">
+
+              Total :
+
+              <strong>
+                <%= cmd.total.toLocaleString('fr-FR') %> FCFA
+              </strong>
+
+            </span>
+
+            <div
+              class="cmd-statut-actions"
+              id="actions-<%= cmd._id %>"
+            >
+
+              <% if(cmd.statut === 'en_attente'){ %>
+
+                <button
+                  class="btn-statut prep"
+                  onclick="changerStatut('<%= cmd._id %>','en_preparation',this)"
+                >
+                  👨‍🍳 Préparer
+                </button>
+
+                <button
+                  class="btn-statut annul"
+                  onclick="changerStatut('<%= cmd._id %>','annulee',this)"
+                >
+                  ❌ Annuler
+                </button>
+
+              <% } else if(
+                cmd.statut === 'en_preparation'
+                && cmd.type_livraison === 'livraison'
+              ){ %>
+
+                <select
+                  id="livreur-<%= cmd._id %>"
+                  style="
+                    padding:6px 10px;
+                    border:1px solid var(--border);
+                    border-radius:8px;
+                    font-size:13px
+                  "
+                >
+
+                  <option value="">
+                    Choisir livreur...
+                  </option>
+
+                  <% livreurs.forEach(l => { %>
+
+                    <option value="<%= l._id %>">
+                      🛵 <%= l.nom %>
+                    </option>
+
+                  <% }); %>
+
+                </select>
+
+                <button
+                  class="btn-statut livrer"
+                  onclick="assignerLivreur('<%= cmd._id %>')"
+                >
+                  🛵 Livrer
+                </button>
+
+              <% } else if(cmd.statut === 'en_preparation'){ %>
+
+                <button
+                  class="btn-statut serve"
+                  onclick="changerStatut('<%= cmd._id %>','servie',this)"
+                >
+                  ✅ Servir
+                </button>
+
+              <% } else if(cmd.statut === 'en_livraison'){ %>
+
+                <button
+                  class="btn-statut serve"
+                  onclick="changerStatut('<%= cmd._id %>','livree',this)"
+                >
+                  ✅ Livrée
+                </button>
+
+              <% } %>
+
+              <form
+                method="POST"
+                action="/commandes/<%= cmd._id %>/supprimer"
+                style="display:inline"
+                onsubmit="return confirm('Supprimer ?')"
+              >
+
+                <button
+                  type="submit"
+                  class="btn-statut del"
+                >
+                  🗑️
+                </button>
+
+              </form>
+
+            </div>
+
           </div>
+
         </div>
+
       <% }); %>
+
     <% } %>
+
   </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/commandes.js"></script>
 <script src="/js/navbar.js"></script>
+
 <script>
-  const restaurantId = '<%= restaurantId %>';
+const restaurantId = '<%= restaurantId %>';
 </script>
+
 </body>
 </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Suivi commande — <%=commande.num_commande%></title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/menu-client.css"/>
+</head>
+<body style="padding-bottom:2rem">
+<header class="menu-header">
+  <div class="header-wax"></div>
+  <div class="header-content" style="padding:1.25rem">
+    <div class="resto-logo-placeholder">🍽️</div>
+    <div><h1 class="resto-name"><%=restaurant.nom%></h1><p class="resto-adresse">Suivi de commande</p></div>
+  </div>
+</header>
+<main style="max-width:500px;margin:0 auto;padding:1.5rem">
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800"><%=commande.num_commande%></div>
+        <div style="font-size:13px;color:var(--gris)"><%=new Date(commande.createdAt).toLocaleString('fr-FR',{day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'})%></div>
+      </div>
+      <span class="statut-badge statut-<%=commande.statut%>">
+        <%=commande.statut==='en_attente'?'⏳ En attente':commande.statut==='en_preparation'?'👨‍🍳 En préparation':commande.statut==='en_livraison'?'🛵 En livraison':commande.statut==='servie'||commande.statut==='livree'?'✅ Livré / Servi':'❌ Annulé'%>
+      </span>
+    </div>
+    <!-- Barre de progression -->
+    <div style="position:relative;margin:1.5rem 0">
+      <div style="position:absolute;top:14px;left:0;right:0;height:3px;background:var(--border);z-index:0"></div>
+      <div style="display:flex;justify-content:space-between;position:relative;z-index:1">
+        <% const etapes=['en_attente','en_preparation','en_livraison','livree'];
+           const idx=etapes.indexOf(commande.statut);
+           const labels=['Reçue','Préparation','En route','Livrée'];
+           const icons=['📋','👨‍🍳','🛵','✅'];
+           etapes.forEach((e,i)=>{ const done=idx>=i; %>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="width:28px;height:28px;border-radius:50%;background:<%=done?'var(--or)':'var(--border)'%>;display:flex;align-items:center;justify-content:center;font-size:14px"><%=icons[i]%></div>
+            <div style="font-size:11px;color:<%=done?'var(--or)':'var(--gris)'%>;font-weight:<%=done?'600':'400'%>"><%=labels[i]%></div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+    <% if(commande.type_livraison==='livraison'&&livreur){ %>
+      <div style="background:var(--sable);border-radius:10px;padding:12px 14px;margin-top:1rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">🛵 Votre livreur</div>
+        <div style="font-size:14px"><%=livreur.nom%> — <a href="tel:<%=livreur.telephone%>" style="color:var(--or)"><%=livreur.telephone%></a></div>
+      </div>
+    <% } %>
+  </div>
+  <!-- Détail commande -->
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow)">
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem">Détail de votre commande</div>
+    <% commande.items.forEach(item=>{ %>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">
+        <span><strong><%=item.quantite%>×</strong> <%=item.nom%></span>
+        <span style="color:var(--or);font-weight:600"><%=(item.prix*item.quantite).toLocaleString('fr-FR')%> F</span>
+      </div>
+    <% }); %>
+    <% if(commande.reduction>0){ %>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:var(--vert2)">
+        <span>🎁 Promo <%=commande.promo_code%></span>
+        <span>-<%=commande.reduction.toLocaleString('fr-FR')%> FCFA</span>
+      </div>
+    <% } %>
+    <div style="display:flex;justify-content:space-between;padding:12px 0 0;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem">
+      <span>Total</span><span style="color:var(--or)"><%=commande.total.toLocaleString('fr-FR')%> FCFA</span>
+    </div>
+  </div>
+  <a href="/menu/<%=restaurant._id%>" style="display:block;text-align:center;margin-top:1.5rem;color:var(--or);font-weight:600;font-size:14px">← Retour au menu</a>
+</main>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const io2 = io();
+io2.on('statut_commande', data => {
+  if (data.commande_id !== '<%=commande._id%>') return;
+  location.reload();
+});
+</script>
+</body></html>

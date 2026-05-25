@@ -1,0 +1,86 @@
+<%- include('../partials/head',{title:'Analytics'}) %>
+<link rel="stylesheet" href="/css/dashboard.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<%- include('../partials/navbar',{activePage:'analytics'}) %>
+<div class="page-wrapper">
+  <div class="page-header"><div><h1 class="page-title">📊 Analytics</h1><p class="page-sub">Performances de votre restaurant</p></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="changerPeriode(7)"  class="btn btn-outline btn-sm" id="btn7">7 jours</button>
+      <button onclick="changerPeriode(30)" class="btn btn-outline btn-sm" id="btn30">30 jours</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card s-or"><div class="stat-icon" style="background:#FFF3E8">💰</div><div><div class="stat-value"><%=stats.caTotal.toLocaleString('fr-FR')%></div><div class="stat-label">CA total (FCFA)</div></div></div>
+    <div class="stat-card s-vert"><div class="stat-icon" style="background:#D8F3DC">📦</div><div><div class="stat-value"><%=stats.totalCommandes%></div><div class="stat-label">Total commandes</div></div></div>
+    <div class="stat-card s-rouge"><div class="stat-icon" style="background:#FFF3CD">⭐</div><div><div class="stat-value"><%=stats.noteMoyenne%>/5</div><div class="stat-label">Note moyenne (<%=stats.nbAvis%> avis)</div></div></div>
+    <div class="stat-card s-bleu"><div class="stat-icon" style="background:#DBF0FA">🍽️</div><div><div class="stat-value"><%=stats.nbPlats%></div><div class="stat-label">Plats au menu</div></div></div>
+  </div>
+  <div class="analytics-grid">
+    <div class="chart-card" style="grid-column:1/-1">
+      <div class="card-header"><h2 class="card-title">💰 Chiffre d'affaires</h2></div>
+      <div class="chart-wrap"><canvas id="caChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="card-header"><h2 class="card-title">🏆 Top plats</h2></div>
+      <% if(topPlats.length===0){ %><div class="empty-state"><div class="empty-icon">🍽️</div><p style="color:var(--gris)">Pas encore de données</p></div>
+      <% } else { %>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:0.5rem">
+          <% topPlats.forEach((p,i)=>{ const pct=Math.round(p.count/topPlats[0].count*100); %>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                <span><strong>#<%=i+1%></strong> <%=p.nom%></span>
+                <span style="color:var(--or);font-weight:700"><%=p.count%>x</span>
+              </div>
+              <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:<%=pct%>%;background:var(--or);border-radius:3px;transition:width 0.8s ease"></div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+    <div class="chart-card">
+      <div class="card-header"><h2 class="card-title">🕐 Heures de pointe</h2></div>
+      <div class="chart-wrap"><canvas id="heuresChart"></canvas></div>
+    </div>
+  </div>
+</div>
+<script>
+const ca7j   = <%- JSON.stringify(ca7j) %>;
+const heures = <%- JSON.stringify(heures) %>;
+const rid    = '<%=restaurantId%>';
+
+const caCtx = document.getElementById('caChart').getContext('2d');
+let caChart = new Chart(caCtx, {
+  type: 'bar',
+  data: {
+    labels: ca7j.map(d=>d.label),
+    datasets: [{
+      label: 'CA (FCFA)', data: ca7j.map(d=>d.ca),
+      backgroundColor: 'rgba(224,123,57,0.8)', borderColor: 'rgba(196,97,26,1)',
+      borderWidth: 2, borderRadius: 6
+    }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v.toLocaleString('fr-FR')+' F' } } } }
+});
+
+new Chart(document.getElementById('heuresChart').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: Array.from({length:24},(_,i)=>i+'h'),
+    datasets: [{ label:'Commandes', data: heures, fill:true, backgroundColor:'rgba(45,106,79,0.1)', borderColor:'rgba(45,106,79,0.8)', borderWidth:2, tension:0.4, pointBackgroundColor:'rgba(45,106,79,1)' }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true } } }
+});
+
+async function changerPeriode(jours) {
+  document.querySelectorAll('[id^=btn]').forEach(b=>b.classList.remove('btn-primary'));
+  document.getElementById('btn'+jours).classList.add('btn-primary');
+  const data = await fetch(`/analytics/api/ca?periode=${jours}`).then(r=>r.json());
+  caChart.data.labels   = data.map(d=>d.label);
+  caChart.data.datasets[0].data = data.map(d=>d.ca);
+  caChart.update();
+}
+</script>
+<script src="/js/navbar.js"></script>
+</body></html>

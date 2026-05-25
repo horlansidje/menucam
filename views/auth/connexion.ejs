@@ -1,41 +1,28 @@
-<%- include('../partials/head', {title: 'Connexion'}) %>
+<%- include('../partials/head',{title:'Connexion'}) %>
 <link rel="stylesheet" href="/css/auth.css"/>
 <div class="auth-page">
   <div class="auth-left">
     <a href="/" class="back-link">← Retour</a>
-    <div class="auth-brand">
-      <span class="brand-icon">🍽️</span>
-      <span class="brand-name">MenuCam</span>
-    </div>
+    <div class="auth-wax"></div>
+    <div class="auth-brand"><span class="brand-icon">🍽️</span><span class="brand-name">MenuCam</span></div>
     <h1>Bon retour 👋</h1>
     <p>Connectez-vous pour gérer votre menu et vos commandes.</p>
-
-    <% if(error && error.length > 0) { %>
-      <div class="alert alert-error"><%= error %></div>
-    <% } %>
-
+    <% if(error&&error.length>0){%><div class="alert alert-error"><%=error%></div><%}%>
     <form method="POST" action="/auth/connexion" class="auth-form">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" name="email" placeholder="contact@monresto.cm" required autofocus/>
-      </div>
-      <div class="form-group">
-        <label>Mot de passe</label>
-        <input type="password" name="password" placeholder="Votre mot de passe" required/>
-      </div>
-      <button type="submit" class="btn-submit">Se connecter →</button>
+      <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="contact@monresto.cm" required autofocus/></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" name="password" placeholder="Votre mot de passe" required/></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:0.5rem">Se connecter →</button>
     </form>
     <p class="auth-switch">Pas encore de compte ? <a href="/auth/inscription">Créer un compte gratuit</a></p>
   </div>
   <div class="auth-right">
     <div class="auth-illustration">
       <div class="illus-stats">
-        <div class="stat-card"><span class="stat-num">12</span><span class="stat-label">Commandes aujourd'hui</span></div>
-        <div class="stat-card accent"><span class="stat-num">47 500</span><span class="stat-label">FCFA générés</span></div>
-        <div class="stat-card"><span class="stat-num">28</span><span class="stat-label">Plats au menu</span></div>
+        <div class="istat"><div class="istat-num">12</div><div class="istat-label">Commandes aujourd'hui</div></div>
+        <div class="istat accent"><div class="istat-num">47 500</div><div class="istat-label">FCFA générés</div></div>
+        <div class="istat"><div class="istat-num">⭐ 4.8</div><div class="istat-label">Note moyenne clients</div></div>
       </div>
     </div>
   </div>
 </div>
-</body>
-</html>
+</body></html>

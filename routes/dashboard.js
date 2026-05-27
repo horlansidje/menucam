@@ -1,98 +1,70 @@
 const express = require('express');
 const router  = express.Router();
-const db      = require('../models/db');
-const { requireAuth } = require('../middleware/auth');
 const QRCode  = require('qrcode');
+const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
-const multer  = require('multer');
+const db      = require('../models/db');
+const { requireAuth } = require('../middleware/auth');
 
-// Multer config for logos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '../public/uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `logo_${req.session.restaurantId}_${Date.now()}${ext}`);
-  }
-});
 const upload = multer({
-  storage,
-  limits: { fileSize: 3 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Fichier image requis'));
-  }
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => { const d = path.join(__dirname,'../public/uploads'); if(!fs.existsSync(d)) fs.mkdirSync(d,{recursive:true}); cb(null,d); },
+    filename: (req, file, cb) => cb(null, `logo_${req.session.restaurantId}_${Date.now()}${path.extname(file.originalname)}`)
+  }),
+  limits: { fileSize: 3*1024*1024 },
+  fileFilter: (req, file, cb) => file.mimetype.startsWith('image/') ? cb(null,true) : cb(new Error('Image requise'))
 });
 
-// GET dashboard
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const restaurant = await db.restaurants.findOneAsync({ _id: req.session.restaurantId });
-    const plats      = await db.plats.findAsync({ restaurant_id: req.session.restaurantId });
-    const commandes  = await db.commandes.findAsync({ restaurant_id: req.session.restaurantId });
-
-    // Stats
+    const rid = req.session.restaurantId;
+    const restaurant = await db.restaurants.findOneAsync({ _id: rid });
+    const plats      = await db.plats.findAsync({ restaurant_id: rid });
+    const commandes  = await db.commandes.findAsync({ restaurant_id: rid });
+    const avis       = await db.avis.findAsync({ restaurant_id: rid });
     const today = new Date(); today.setHours(0,0,0,0);
-    const commandesAujourdhui = commandes.filter(c => new Date(c.createdAt) >= today);
-    const caAujourdhui = commandesAujourdhui
-      .filter(c => c.statut !== 'annulee')
-      .reduce((sum, c) => sum + (c.total || 0), 0);
-
-    // QR code URL
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    const menuUrl = `${baseUrl}/menu/${restaurant._id}`;
-    const qrDataUrl = await QRCode.toDataURL(menuUrl, {
-      width: 300, margin: 2,
-      color: { dark: '#1a1a2e', light: '#ffffff' }
-    });
-
-    // Commandes récentes (10 dernières)
-    const commandesRecentes = commandes
-      .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 10);
-
+    const todayC = commandes.filter(c => new Date(c.createdAt) >= today);
+    const recentes = commandes.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,8);
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT||3000}`;
+    const menuUrl = `${baseUrl}/menu/${rid}`;
+    const qrDataUrl = await QRCode.toDataURL(menuUrl, { width: 280, margin: 2, color: { dark: '#111827', light: '#ffffff' } });
+    const caWeek = [];
+    for (let i=6;i>=0;i--) {
+      const d=new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
+      const fin=new Date(d); fin.setHours(23,59,59,999);
+      const dayCmds=commandes.filter(c=>{const cd=new Date(c.createdAt);return cd>=d&&cd<=fin&&c.statut!=='annulee';});
+      caWeek.push({ label: d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric'}), ca: dayCmds.reduce((s,c)=>s+(c.total||0),0), nb: dayCmds.length });
+    }
     res.render('restaurateur/dashboard', {
-      restaurant, plats, qrDataUrl, menuUrl,
+      restaurant, plats, qrDataUrl, menuUrl, recentes,
       stats: {
         totalPlats: plats.length,
-        commandesAujourdhui: commandesAujourdhui.length,
-        caAujourdhui,
-        commandesEnAttente: commandes.filter(c => c.statut === 'en_attente').length
+        commandesAujourdhui: todayC.length,
+        caAujourdhui: todayC.filter(c=>c.statut!=='annulee').reduce((s,c)=>s+(c.total||0),0),
+        enAttente: commandes.filter(c=>c.statut==='en_attente').length,
+        noteMoyenne: restaurant.note_moyenne || 0,
+        nbAvis: avis.length,
+        caTotal: commandes.filter(c=>c.statut!=='annulee').reduce((s,c)=>s+(c.total||0),0)
       },
-      commandesRecentes,
-      error:   req.flash('error'),
-      success: req.flash('success')
+      caWeek, error: req.flash('error'), success: req.flash('success')
     });
-  } catch (err) {
-    console.error(err);
-    res.redirect('/auth/connexion');
-  }
+  } catch(err) { console.error(err); res.redirect('/auth/connexion'); }
 });
 
-// GET profil
 router.get('/profil', requireAuth, async (req, res) => {
   const restaurant = await db.restaurants.findOneAsync({ _id: req.session.restaurantId });
   res.render('restaurateur/profil', { restaurant, error: req.flash('error'), success: req.flash('success') });
 });
 
-// POST update profil
 router.post('/profil', requireAuth, upload.single('logo'), async (req, res) => {
-  try {
-    const { nom, telephone, adresse, ville, description } = req.body;
-    const update = { nom, telephone, adresse, ville, description };
-    if (req.file) update.logo = '/uploads/' + req.file.filename;
-    await db.restaurants.updateAsync({ _id: req.session.restaurantId }, { $set: update });
-    req.session.restaurantNom = nom;
-    req.flash('success', 'Profil mis à jour avec succès !');
-    res.redirect('/dashboard/profil');
-  } catch (err) {
-    req.flash('error', 'Erreur lors de la mise à jour.');
-    res.redirect('/dashboard/profil');
-  }
+  const { nom, telephone, adresse, ville, description } = req.body;
+  const update = { nom, telephone, adresse: adresse||'', ville: ville||'Douala', description: description||'' };
+  if (req.file) update.logo = '/uploads/' + req.file.filename;
+  await db.restaurants.updateAsync({ _id: req.session.restaurantId }, { $set: update });
+  req.session.restaurantNom = nom;
+  req.flash('success', 'Profil mis à jour !');
+  res.redirect('/dashboard/profil');
 });
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const Datastore = require('@seald-io/nedb');
 const path = require('path');
-const fs   = require('fs');
+const fs = require('fs');
 
 const dbPath = process.env.DB_PATH || path.join(__dirname, '../data');
 if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
@@ -17,8 +17,6 @@ const db = {
 db.restaurants.ensureIndex({ fieldName: 'email', unique: true });
 db.plats.ensureIndex({ fieldName: 'restaurant_id' });
 db.commandes.ensureIndex({ fieldName: 'restaurant_id' });
-db.livreurs.ensureIndex({ fieldName: 'restaurant_id' });
-db.promos.ensureIndex({ fieldName: 'restaurant_id' });
-db.avis.ensureIndex({ fieldName: 'restaurant_id' });
+db.commandes.ensureIndex({ fieldName: 'num_commande' });
 
 module.exports = db;

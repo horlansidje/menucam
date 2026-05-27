@@ -2,79 +2,139 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Suivi commande — <%=commande.num_commande%></title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="/css/menu-client.css"/>
+  <title>Suivi commande <%= commande.num_commande %></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <link rel="stylesheet" href="/css/menu-public.css"/>
+  <style>
+    body { background: #F3F4F6; padding-bottom: 2rem; }
+    .suivi-wrap { max-width: 520px; margin: 0 auto; padding: 1.5rem; }
+    .suivi-header { background: linear-gradient(135deg,#111827,#1F2937); border-radius: 20px; padding: 1.5rem; color: #fff; margin-bottom: 1.25rem; text-align: center; }
+    .suivi-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.2rem; font-weight: 800; color: #F59E0B; margin-bottom: 4px; }
+    .suivi-card { background: #fff; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #E5E7EB; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .card-section-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F3F4F6; font-size: 14px; }
+    .detail-row:last-child { border: none; }
+    .detail-label { color: #6B7280; }
+    .detail-val { font-weight: 600; color: #111827; }
+    .item-line { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F3F4F6; font-size: 14px; }
+    .item-line:last-child { border: none; }
+    .qty-tag { background: #F59E0B; color: #111; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 4px; min-width: 26px; text-align: center; }
+    .total-final { display: flex; justify-content: space-between; padding: 12px 0 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.1rem; border-top: 2px solid #E5E7EB; margin-top: 4px; }
+    .total-final span:last-child { color: #F59E0B; }
+    .livreur-box { display: flex; align-items: center; gap: 12px; background: #F9FAFB; border-radius: 10px; padding: 12px; }
+    .livreur-avatar { width: 44px; height: 44px; border-radius: 50%; background: #FEF3C7; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #6B7280; font-size: 14px; font-weight: 500; margin-bottom: 1rem; }
+  </style>
 </head>
-<body style="padding-bottom:2rem">
-<header class="menu-header">
-  <div class="header-wax"></div>
-  <div class="header-content" style="padding:1.25rem">
-    <div class="resto-logo-placeholder">🍽️</div>
-    <div><h1 class="resto-name"><%=restaurant.nom%></h1><p class="resto-adresse">Suivi de commande</p></div>
+<body>
+<div class="suivi-wrap">
+  <a href="/menu/<%= restaurant._id %>" class="back-btn"><i class="bi bi-arrow-left"></i> Retour au menu</a>
+
+  <div class="suivi-header">
+    <div style="font-size:2rem;margin-bottom:.5rem">📦</div>
+    <div class="suivi-num"><%= commande.num_commande %></div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5)"><%= new Date(commande.createdAt).toLocaleString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></div>
   </div>
-</header>
-<main style="max-width:500px;margin:0 auto;padding:1.5rem">
-  <div style="background:#fff;border-radius:16px;padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800"><%=commande.num_commande%></div>
-        <div style="font-size:13px;color:var(--gris)"><%=new Date(commande.createdAt).toLocaleString('fr-FR',{day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'})%></div>
-      </div>
-      <span class="statut-badge statut-<%=commande.statut%>">
-        <%=commande.statut==='en_attente'?'⏳ En attente':commande.statut==='en_preparation'?'👨‍🍳 En préparation':commande.statut==='en_livraison'?'🛵 En livraison':commande.statut==='servie'||commande.statut==='livree'?'✅ Livré / Servi':'❌ Annulé'%>
-      </span>
+
+  <!-- Progress steps -->
+  <div class="suivi-card">
+    <div class="card-section-title"><i class="bi bi-map"></i> Statut de votre commande</div>
+    <% 
+      const steps = [
+        {key:'en_attente',    label:'Reçue',       icon:'bi-check-circle'},
+        {key:'en_preparation',label:'Préparation', icon:'bi-fire'},
+        {key:'en_livraison',  label:'En route',    icon:'bi-scooter'},
+        {key:'livree',        label:'Livrée',      icon:'bi-house-check'}
+      ];
+      const order = ['en_attente','en_preparation','en_livraison','livree','servie'];
+      const curIdx = order.indexOf(commande.statut);
+    %>
+    <div class="steps-track">
+      <% steps.forEach((step, i) => {
+        const stepIdx = order.indexOf(step.key);
+        const isDone   = curIdx > stepIdx || (commande.statut === 'servie' && step.key === 'livree');
+        const isActive = commande.statut === step.key || (commande.statut === 'servie' && step.key === 'livree');
+      %>
+        <div class="step-item <%= isDone ? 'done' : isActive ? 'active' : '' %>">
+          <div class="step-bubble"><i class="bi <%= step.icon %>"></i></div>
+          <div class="step-label"><%= step.label %></div>
+        </div>
+      <% }); %>
     </div>
-    <!-- Barre de progression -->
-    <div style="position:relative;margin:1.5rem 0">
-      <div style="position:absolute;top:14px;left:0;right:0;height:3px;background:var(--border);z-index:0"></div>
-      <div style="display:flex;justify-content:space-between;position:relative;z-index:1">
-        <% const etapes=['en_attente','en_preparation','en_livraison','livree'];
-           const idx=etapes.indexOf(commande.statut);
-           const labels=['Reçue','Préparation','En route','Livrée'];
-           const icons=['📋','👨‍🍳','🛵','✅'];
-           etapes.forEach((e,i)=>{ const done=idx>=i; %>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-            <div style="width:28px;height:28px;border-radius:50%;background:<%=done?'var(--or)':'var(--border)'%>;display:flex;align-items:center;justify-content:center;font-size:14px"><%=icons[i]%></div>
-            <div style="font-size:11px;color:<%=done?'var(--or)':'var(--gris)'%>;font-weight:<%=done?'600':'400'%>"><%=labels[i]%></div>
-          </div>
-        <% }); %>
-      </div>
-    </div>
-    <% if(commande.type_livraison==='livraison'&&livreur){ %>
-      <div style="background:var(--sable);border-radius:10px;padding:12px 14px;margin-top:1rem">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px">🛵 Votre livreur</div>
-        <div style="font-size:14px"><%=livreur.nom%> — <a href="tel:<%=livreur.telephone%>" style="color:var(--or)"><%=livreur.telephone%></a></div>
+    <% if(commande.statut === 'annulee') { %>
+      <div style="text-align:center;padding:1rem;background:#FEE2E2;border-radius:10px;margin-top:1rem">
+        <span style="color:#B91C1C;font-weight:700">❌ Commande annulée</span>
       </div>
     <% } %>
   </div>
-  <!-- Détail commande -->
-  <div style="background:#fff;border-radius:16px;padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow)">
-    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem">Détail de votre commande</div>
-    <% commande.items.forEach(item=>{ %>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">
-        <span><strong><%=item.quantite%>×</strong> <%=item.nom%></span>
-        <span style="color:var(--or);font-weight:600"><%=(item.prix*item.quantite).toLocaleString('fr-FR')%> F</span>
+
+  <% if(livreur && commande.statut === 'en_livraison') { %>
+  <div class="suivi-card">
+    <div class="card-section-title"><i class="bi bi-scooter"></i> Votre livreur</div>
+    <div class="livreur-box">
+      <div class="livreur-avatar">🛵</div>
+      <div>
+        <div style="font-weight:700;font-size:15px"><%= livreur.nom %></div>
+        <a href="tel:<%= livreur.telephone %>" style="font-size:13px;color:#F59E0B;font-weight:600"><i class="bi bi-telephone"></i> <%= livreur.telephone %></a>
+        <% if(livreur.moto) { %><div style="font-size:12px;color:#6B7280">🏍️ <%= livreur.moto %></div><% } %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Order details -->
+  <div class="suivi-card">
+    <div class="card-section-title"><i class="bi bi-receipt"></i> Détail de la commande</div>
+    <% commande.items.forEach(item => { %>
+      <div class="item-line">
+        <span class="qty-tag"><%= item.quantite %>×</span>
+        <span style="flex:1"><%= item.nom %></span>
+        <span style="font-weight:600;color:#6B7280"><%= (item.prix * item.quantite).toLocaleString('fr-FR') %> F</span>
       </div>
     <% }); %>
-    <% if(commande.reduction>0){ %>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:var(--vert2)">
-        <span>🎁 Promo <%=commande.promo_code%></span>
-        <span>-<%=commande.reduction.toLocaleString('fr-FR')%> FCFA</span>
+    <% if(commande.reduction > 0) { %>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:#059669">
+        <span>🎁 Promo <%= commande.promo_code %></span>
+        <span>-<%= commande.reduction.toLocaleString('fr-FR') %> FCFA</span>
       </div>
     <% } %>
-    <div style="display:flex;justify-content:space-between;padding:12px 0 0;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem">
-      <span>Total</span><span style="color:var(--or)"><%=commande.total.toLocaleString('fr-FR')%> FCFA</span>
-    </div>
+    <div class="total-final"><span>Total</span><span><%= commande.total.toLocaleString('fr-FR') %> FCFA</span></div>
   </div>
-  <a href="/menu/<%=restaurant._id%>" style="display:block;text-align:center;margin-top:1.5rem;color:var(--or);font-weight:600;font-size:14px">← Retour au menu</a>
-</main>
+
+  <!-- Info client -->
+  <div class="suivi-card">
+    <div class="card-section-title"><i class="bi bi-person"></i> Informations</div>
+    <div class="detail-row"><span class="detail-label">Client</span><span class="detail-val"><%= commande.client_nom %></span></div>
+    <% if(commande.client_telephone) { %><div class="detail-row"><span class="detail-label">Téléphone</span><span class="detail-val"><%= commande.client_telephone %></span></div><% } %>
+    <div class="detail-row"><span class="detail-label">Type</span><span class="detail-val"><%= commande.type_livraison==='livraison'?'🛵 Livraison':commande.type_livraison==='a_emporter'?'🛍️ À emporter':'🪑 Sur place' %></span></div>
+    <% if(commande.type_livraison==='livraison'&&commande.client_adresse) { %><div class="detail-row"><span class="detail-label">Adresse</span><span class="detail-val"><%= commande.client_adresse %><% if(commande.client_quartier){%>, <%=commande.client_quartier%><%}%></span></div><% } %>
+    <% if(commande.client_table) { %><div class="detail-row"><span class="detail-label">Table</span><span class="detail-val"><%= commande.client_table %></span></div><% } %>
+    <div class="detail-row"><span class="detail-label">Paiement</span><span class="detail-val"><%= commande.paiement==='mtn'?'📱 MTN Mobile Money':commande.paiement==='orange'?'🟠 Orange Money':'💬 WhatsApp' %></span></div>
+  </div>
+
+  <% if(commande.note) { %>
+  <div class="suivi-card">
+    <div style="font-size:13px;color:#6B7280"><i class="bi bi-chat-text"></i> <strong>Note :</strong> <%= commande.note %></div>
+  </div>
+  <% } %>
+
+  <div style="display:flex;gap:10px">
+    <a href="/commandes/<%= commande._id %>/recu" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:#111827;color:#fff;border-radius:12px;font-weight:700;font-size:14px"><i class="bi bi-file-earmark-pdf"></i> Télécharger le reçu</a>
+    <a href="/menu/<%= restaurant._id %>" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:#F59E0B;color:#111;border-radius:12px;font-weight:700;font-size:14px"><i class="bi bi-arrow-repeat"></i> Recommander</a>
+  </div>
+</div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const io2 = io();
 io2.on('statut_commande', data => {
-  if (data.commande_id !== '<%=commande._id%>') return;
-  location.reload();
+  if (data.commande_id !== '<%= commande._id %>') return;
+  const statusMap = { en_attente:'⏳ En attente', en_preparation:'👨‍🍳 En préparation', en_livraison:'🛵 En route', servie:'✅ Servie', livree:'✅ Livrée', annulee:'❌ Annulée' };
+  if (['servie','livree','annulee'].includes(data.statut)) {
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    location.reload();
+  }
 });
 </script>
 </body></html>

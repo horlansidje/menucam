@@ -1,148 +1,58 @@
-# 🍽️ MenuCam — Générateur de Menus QR Code pour Restaurants
+# 🍽️ MenuCam V3 — Plateforme SaaS Restaurant Premium
 
-Plateforme SaaS locale permettant aux restaurateurs camerounais de créer leur menu digital,
-générer un QR Code unique, et recevoir des commandes via WhatsApp en temps réel.
+Plateforme complète de gestion restaurant avec menu QR Code, livraison, paiement Mobile Money, reçus PDF, suivi commandes en temps réel et analytics avancés.
 
----
+## 🚀 Installation rapide
 
-## 🚀 Installation rapide (locale)
-
-### Prérequis
-- Node.js >= 18
-- npm
-
-### 1. Cloner et installer
 ```bash
-git clone <votre-repo>
-cd qrcode-restaurant
+cd menucam-v3
 npm install
+npm start
+# → http://localhost:3000
 ```
 
-### 2. Configuration
-```bash
-cp .env.example .env
-# Éditez .env si nécessaire
-```
+## 📧 Compte démo (créé automatiquement au premier démarrage)
+- **Email** : demo@menucam.cm
+- **Mot de passe** : demo1234
+- **Restaurant** : Chez Maman Biya — Douala (27 plats camerounais)
 
-### 3. Lancer
-```bash
-npm start          # Production
-npm run dev        # Développement (auto-reload)
-```
-
-### 4. Ouvrir
-```
-http://localhost:3000
-```
-
----
-
-## 🌐 Déploiement sur Railway (gratuit)
-
-### Étapes
-1. Créer un compte sur [railway.app](https://railway.app)
-2. Nouveau projet → Deploy from GitHub repo
-3. Variables d'environnement à configurer :
-
+## ⚙️ Variables d'environnement (.env)
 ```
 PORT=3000
-SESSION_SECRET=votre_secret_fort_ici
-BASE_URL=https://votre-app.up.railway.app
+SESSION_SECRET=votre_secret_fort
+BASE_URL=https://votre-domaine.com
 DB_PATH=./data
 ```
 
-4. Railway détecte automatiquement Node.js et lance `npm start`
-5. Votre app est en ligne en 2 minutes ✅
+## 🌐 Déploiement Railway
+1. `git push` sur GitHub
+2. Railway détecte Node.js et déploie automatiquement
+3. Variables à ajouter dans Railway → Variables :
+   - SESSION_SECRET, BASE_URL, DB_PATH=./data, PORT=3000
 
-### Alternative : Render.com
-1. [render.com](https://render.com) → New Web Service
-2. Build Command : `npm install`
-3. Start Command : `npm start`
-4. Mêmes variables d'environnement
+## ✨ Fonctionnalités V3
 
----
-
-## 📁 Structure du projet
-
-```
-qrcode-restaurant/
-├── server.js              # Point d'entrée + Socket.io
-├── models/
-│   └── db.js              # Base de données NeDB (fichiers locaux)
-├── middleware/
-│   └── auth.js            # Protection des routes
-├── routes/
-│   ├── auth.js            # Inscription / Connexion
-│   ├── dashboard.js       # Dashboard restaurateur + QR code
-│   ├── plats.js           # CRUD plats du menu
-│   ├── commandes.js       # Gestion commandes + Socket.io
-│   └── menu.js            # Page menu publique (clients)
-├── views/
-│   ├── index.ejs          # Landing page
-│   ├── 404.ejs
-│   ├── partials/          # Navbar, head
-│   ├── auth/              # Connexion, Inscription
-│   ├── restaurateur/      # Dashboard, Plats, Commandes, Profil
-│   └── client/            # Menu public après scan QR
-├── public/
-│   ├── css/               # Styles par page
-│   ├── js/                # Scripts client
-│   └── uploads/           # Photos plats (auto-créé)
-├── data/                  # Base de données NeDB (auto-créé)
-├── .env.example
-└── package.json
-```
-
----
-
-## ✨ Fonctionnalités
-
-| Fonctionnalité | Description |
-|---|---|
-| 🏪 Multi-restaurants | Chaque restaurant a son propre compte |
-| 📱 QR Code unique | Généré automatiquement, téléchargeable en PNG |
-| 🍽️ Menu digital | Plats par catégorie avec photos, prix en FCFA |
-| 💬 Commande WhatsApp | Message pré-rempli envoyé automatiquement |
-| ⚡ Temps réel | Socket.io : nouvelles commandes sans refresh |
-| 👨‍🍳 Gestion statuts | En attente → En préparation → Servie |
-| 📊 Dashboard | Stats du jour, CA, commandes en attente |
-| 📸 Upload photos | Photos des plats et logo du restaurant |
-| 🔐 Auth sécurisée | bcrypt, sessions, middleware de protection |
-| 📱 Responsive | Menu client optimisé mobile |
-
----
-
-## 🎯 Scénario de démo jury
-
-1. Le jury scanne le QR code posé sur la table avec leur téléphone
-2. Le menu s'ouvre instantanément (photos, plats, prix en FCFA)
-3. Ils sélectionnent un jus de fruit et cliquent "Ajouter"
-4. Ils ouvrent le panier → "Commander via WhatsApp"
-5. Un message pré-rempli s'ouvre → ils envoient en 1 clic
-6. Le dashboard restaurateur affiche la commande en temps réel
-7. Un équipier apporte le vrai jus 2 minutes après 🎉
-
----
-
-## 💰 Modèle économique
-
-- **Gratuit** : 20 plats, 1 QR code
-- **Pro** : 15 000 FCFA/mois — plats et commandes illimités
-- **Business** : 25 000 FCFA/mois — multi-restaurants, rapports PDF
-
----
+| Module | Description |
+|--------|-------------|
+| 🎨 Design premium | Sidebar moderne, typographie Bricolage Grotesque + Plus Jakarta Sans |
+| 📱 Menu QR Code | Page menu responsive avec recherche, filtres, animations |
+| 🛵 Livraison | Livreurs, assignation, suivi temps réel Socket.io |
+| 💳 Mobile Money | MTN & Orange Money avec instructions USSD |
+| 📄 Reçus PDF | PDF professionnel avec QR code de suivi inclus |
+| 📦 Suivi commandes | Lien unique par commande, expire 24h après livraison |
+| 📊 Analytics | Chart.js — CA hebdo, top plats, heures de pointe |
+| ⭐ Avis clients | Notation 5 étoiles, réponses du restaurateur |
+| 🎁 Codes promo | Pourcentage, montant fixe, limite usage, expiration |
+| 🔒 Sécurité | bcrypt, sessions, expiry des liens de suivi |
 
 ## 🛠️ Stack technique
-
 - **Backend** : Node.js + Express.js
-- **Base de données** : NeDB (fichiers locaux, zéro configuration)
+- **DB** : NeDB (@seald-io/nedb) — fichiers locaux, zéro config
 - **Templates** : EJS
 - **Temps réel** : Socket.io
+- **PDF** : PDFKit
+- **QR Code** : qrcode
 - **Auth** : bcryptjs + express-session
 - **Upload** : Multer
-- **QR Code** : qrcode.js
-- **Fonts** : Syne + DM Sans (Google Fonts)
-
----
-
-Fait avec ❤️ à Douala, Cameroun · 2024
+- **Charts** : Chart.js (CDN)
+- **Icons** : Bootstrap Icons (CDN)

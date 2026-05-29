@@ -35,6 +35,7 @@ router.post('/nouvelle', async (req, res) => {
     if (!restaurant_id || !items?.length) return res.status(400).json({ ok:false });
     const restaurant = await db.restaurants.findOneAsync({ _id: restaurant_id });
     if (!restaurant) return res.status(404).json({ ok:false });
+    const { lat, lng } = req.body;
     const num = 'CMD-' + Date.now().toString(36).toUpperCase().slice(-6);
     const commande = await db.commandes.insertAsync({
       restaurant_id, num_commande: num, items,
@@ -43,7 +44,9 @@ router.post('/nouvelle', async (req, res) => {
       client_table: client_table||'', note: note||'',
       type_livraison: type_livraison||'sur_place', paiement: paiement||'whatsapp',
       promo_code: promo_code||null, total_avant_promo: parseFloat(total_avant_promo)||0,
-      reduction: parseFloat(reduction)||0, total: parseFloat(total)||0,
+      reduction: parseFloat(reduction)||0,
+      lat: lat ? parseFloat(lat) : null,
+      lng: lng ? parseFloat(lng) : null, total: parseFloat(total)||0,
       statut: 'en_attente', livreur_id: null, expire_at: null,
       createdAt: new Date()
     });

@@ -100,8 +100,57 @@
     </div>
   </div>
 </div>
+    <!-- Carte des livraisons -->
+    <div id="mapSection" class="card" style="margin-top:1.5rem">
+      <div class="card-header-bar">
+        <div>
+          <div class="card-title"><i class="bi bi-map"></i> Carte des livraisons</div>
+          <div class="card-subtitle">Positions des commandes de livraison en cours</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="mapCmdBadge" class="badge badge-gray">Chargement...</span>
+          <button id="refreshMap" onclick="initCommandesMapPage()" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Actualiser</button>
+        </div>
+      </div>
+      <div style="padding:0">
+        <div id="commandesMap" class="leaflet-map-wrap" style="height:420px;border-radius:0 0 16px 16px"></div>
+      </div>
+      <div class="card-body" style="padding:.75rem 1.25rem">
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> En attente</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div> En préparation</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div> En livraison</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div> Livrée</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1B4332"></div> Votre restaurant</div>
+        </div>
+      </div>
+    </div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/commandes.js"></script>
 <script src="/js/app.js"></script>
 <script>const restaurantId='<%=restaurantId%>';</script>
 </body></html>
+
+<!-- Leaflet init for commandes -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/map-dashboard.js"></script>
+<script>
+async function initCommandesMapPage() {
+  try {
+    const [commandes, restaurant] = await Promise.all([
+      fetch('/maps/commandes').then(r => r.json()),
+      fetch('/maps/restaurant').then(r => r.json()),
+    ]);
+    const badge = document.getElementById('mapCmdBadge');
+    if (badge) {
+      badge.className = commandes.length > 0 ? 'badge badge-success' : 'badge badge-gray';
+      badge.textContent = commandes.length > 0 ? commandes.length + ' livraison(s)' : 'Aucune livraison';
+    }
+    initCommandesMap(commandes, restaurant);
+  } catch(e) {
+    console.error('Erreur carte commandes:', e);
+  }
+}
+initCommandesMapPage();
+</script>

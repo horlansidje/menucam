@@ -186,7 +186,9 @@ async function commander() {
     client_quartier: quartier, client_table: table, note,
     type_livraison: deliveryType, paiement: payMethod,
     promo_code: promoApplied?.code || null,
-    total_avant_promo: subtotal, reduction: promoReduction, total
+    total_avant_promo: subtotal, reduction: promoReduction, total,
+    lat: (typeof clientCoords !== "undefined" && clientCoords) ? clientCoords.lat : null,
+    lng: (typeof clientCoords !== "undefined" && clientCoords) ? clientCoords.lng : null,
   };
 
   let numCommande = '';
@@ -354,3 +356,25 @@ document.querySelectorAll('.menu-section').forEach(s => observer.observe(s));
 
 // ── Init ──────────────────────────────────────────────────────
 updateCommanderBtn();
+
+// ── Géolocalisation — override selectDelivery ─────────────────
+const _origSelectDelivery = selectDelivery;
+selectDelivery = function(el, type) {
+  _origSelectDelivery(el, type);
+  if (type === 'livraison') {
+    // Initialiser la carte avec un petit délai pour que le DOM soit visible
+    setTimeout(() => {
+      if (typeof initClientMap === 'function') initClientMap();
+    }, 150);
+  }
+};
+
+// Sauvegarder les coords GPS avec la commande
+const _origCommander = commander;
+commander = async function() {
+  // Si on a des coordonnées GPS, les inclure dans la commande
+  if (typeof clientCoords !== 'undefined' && clientCoords) {
+    window._gpsCoords = clientCoords;
+  }
+  await _origCommander();
+};

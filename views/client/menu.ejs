@@ -181,9 +181,26 @@
         <input type="text" id="clientTable" class="form-input" placeholder="Ex: 5"/>
       </div>
       <div id="adresseRows" style="display:none">
+        <!-- Carte Leaflet GPS livraison -->
+        <div class="client-map-section" style="margin-bottom:.75rem">
+          <div class="client-map-header">
+            <div class="client-map-title">
+              <i class="bi bi-map"></i> Votre position de livraison
+            </div>
+            <button onclick="recentrerPosition()" type="button" style="background:none;border:none;cursor:pointer;color:#F59E0B;font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px">
+              <i class="bi bi-crosshair2"></i> Recentrer
+            </button>
+          </div>
+          <div id="clientMap"></div>
+          <div style="padding:8px 14px 10px">
+            <div id="gpsBadge" class="gps-badge loading">
+              <i class="bi bi-arrow-repeat"></i> En attente...
+            </div>
+          </div>
+        </div>
         <div style="margin-bottom:.75rem">
           <label class="form-label">Adresse de livraison</label>
-          <input type="text" id="clientAdresse" class="form-input" placeholder="Rue, numéro..."/>
+          <input type="text" id="clientAdresse" class="form-input" placeholder="Détectée automatiquement ou saisissez..."/>
         </div>
         <div style="margin-bottom:.75rem">
           <label class="form-label">Quartier</label>
@@ -232,10 +249,16 @@
   </div>
 </div>
 
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="/css/leaflet-custom.css"/>
+
 <script>
 const RESTAURANT_ID  = '<%= restaurant._id %>';
 const RESTAURANT_TEL = '<%= (restaurant.telephone||"").replace(/\s/g,"") %>';
 const RESTAURANT_NOM = '<%= restaurant.nom.replace(/'/g,"\\'") %>';
 </script>
 <script src="/js/menu-public.js"></script>
+<script src="/js/map-client.js"></script>
 </body></html>

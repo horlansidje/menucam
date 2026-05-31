@@ -20,3 +20,4 @@ db.commandes.ensureIndex({ fieldName: 'restaurant_id' });
 db.commandes.ensureIndex({ fieldName: 'num_commande' });
 
 module.exports = db;
+// (already loaded above)

@@ -34,6 +34,11 @@
           <% if(restaurant.note_moyenne) { %>
             <span class="meta-chip rating"><i class="bi bi-star-fill"></i> <%= restaurant.note_moyenne %> (<%= restaurant.nb_avis %> avis)</span>
           <% } %>
+          <% if(typeof statut_ouverture !== 'undefined' && statut_ouverture) { %>
+            <span class="meta-chip" style="background:<%= statut_ouverture.ouvert ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.12)' %>;color:<%= statut_ouverture.ouvert ? '#059669' : '#B91C1C' %>;border:1px solid <%= statut_ouverture.ouvert ? 'rgba(16,185,129,.3)' : 'rgba(239,68,68,.2)' %>">
+              <%= statut_ouverture.message %>
+            </span>
+          <% } %>
         </div>
         <% if(restaurant.description) { %>
           <p class="restaurant-desc"><%= restaurant.description %></p>

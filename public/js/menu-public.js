@@ -198,6 +198,19 @@ async function commander() {
     if (data.ok) numCommande = data.num_commande;
   } catch(e) { console.error(e); }
 
+  // Vérification fidélité — récompense automatique
+  try {
+    const fidRes = await fetch('/fidelite/api/check-fidelite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ restaurant_id: RESTAURANT_ID, client_nom: nom, client_telephone: tel, total_commande: total })
+    });
+    const fidData = await fidRes.json();
+    if (fidData.ok && fidData.offre) {
+      setTimeout(() => showToast('🎁 ' + fidData.offre.message, 'success', 6000), 2000);
+    }
+  } catch(e) { /* silencieux */ }
+
   closeCart();
 
   if (payMethod === 'whatsapp') {

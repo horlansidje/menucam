@@ -29,6 +29,7 @@ io.on('connection', socket => {
   socket.on('rejoindre_restaurant', id => socket.join(`restaurant_${id}`));
 });
 
+// Routes existantes
 app.use('/auth',      require('./routes/auth'));
 app.use('/dashboard', require('./routes/dashboard'));
 app.use('/plats',     require('./routes/plats'));
@@ -39,17 +40,34 @@ app.use('/promos',    require('./routes/promos'));
 app.use('/avis',      require('./routes/avis'));
 app.use('/analytics', require('./routes/analytics'));
 app.use('/maps',      require('./routes/maps'));
-app.use('/livreur',    require('./routes/livreur-app'));
+app.use('/livreur',   require('./routes/livreur-app'));
+
+// Nouvelles routes
+app.use('/categories',  require('./routes/categories'));
+app.use('/horaires',    require('./routes/horaires'));
+app.use('/fidelite',    require('./routes/fidelite'));
+app.use('/restaurants', require('./routes/restaurants'));
 
 app.get('/', (req, res) => { if (req.session.restaurantId) return res.redirect('/dashboard'); res.render('index'); });
 app.use((req, res) => res.status(404).render('404'));
 app.use((err, req, res, next) => { console.error(err); res.status(500).send('Erreur serveur'); });
 
-// Auto-seed if empty
+// Auto-seed + génération slugs manquants
 const db = require('./models/db');
+const { slugify } = require('./routes/restaurants');
 setTimeout(async () => {
   const count = await db.restaurants.countAsync({});
   if (count === 0) { console.log('Base vide — lancement du seed...'); require('./seed'); }
+  // Générer les slugs manquants
+  const restos = await db.restaurants.findAsync({ slug: { $exists: false } });
+  for (const r of restos) {
+    let slug = slugify(r.nom);
+    // S'assurer de l'unicité
+    let existing = await db.restaurants.findOneAsync({ slug, _id: { $ne: r._id } });
+    let suffix = 1;
+    while (existing) { slug = `${slugify(r.nom)}-${suffix++}`; existing = await db.restaurants.findOneAsync({ slug, _id: { $ne: r._id } }); }
+    await db.restaurants.updateAsync({ _id: r._id }, { $set: { slug } });
+  }
 }, 1500);
 
-server.listen(PORT, '0.0.0.0', () => console.log(`\n✅  MenuCam V3 démarré → http://localhost:${PORT}\n`));
+server.listen(PORT, '0.0.0.0', () => console.log(`\n✅  MenuCam V3 Enhanced démarré → http://localhost:${PORT}\n`));

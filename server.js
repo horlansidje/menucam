@@ -9,194 +9,139 @@ const http = require('http');
 const fs = require('fs');
 const { Server } = require('socket.io');
 
-// ─────────────────────────────────────────────
-// Logs Railway
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// LOGS SAFE (Railway OK)
+// ─────────────────────────────
 const log = {
-  info: (...args) =>
-    console.log(`[${new Date().toISOString()}] ℹ️`, ...args),
-
-  ok: (...args) =>
-    console.log(`[${new Date().toISOString()}] ✅`, ...args),
-
-  warn: (...args) =>
-    console.warn(`[${new Date().toISOString()}] ⚠️`, ...args),
-
-  error: (...args) =>
-    console.error(`[${new Date().toISOString()}] ❌`, ...args),
+  info: function (...args) {
+    console.log(`[${new Date().toISOString()}] ℹ️`, ...args);
+  },
+  ok: function (...args) {
+    console.log(`[${new Date().toISOString()}] ✅`, ...args);
+  },
+  warn: function (...args) {
+    console.warn(`[${new Date().toISOString()}] ⚠️`, ...args);
+  },
+  error: function (...args) {
+    console.error(`[${new Date().toISOString()}] ❌`, ...args);
+  }
 };
 
-// ─────────────────────────────────────────────
-// App + Server
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// APP + SERVER
+// ─────────────────────────────
 const app = express();
 const server = http.createServer(app);
 
-// ─────────────────────────────────────────────
-// Port Railway
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// PORT RAILWAY
+// ─────────────────────────────
 const PORT = process.env.PORT || 3000;
 
-// ─────────────────────────────────────────────
-// Socket.io
-// ─────────────────────────────────────────────
-const allowedOrigins = process.env.APP_URL
-  ? [process.env.APP_URL, 'http://localhost:3000']
-  : '*';
-
+// ─────────────────────────────
+// SOCKET.IO
+// ─────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
   transports: ['websocket', 'polling'],
 });
 
-// ─────────────────────────────────────────────
-// Uploads
-// ─────────────────────────────────────────────
-const uploadDir =
-  process.env.UPLOAD_PATH ||
-  path.join(__dirname, 'public/uploads');
+// ─────────────────────────────
+// UPLOAD DIR
+// ─────────────────────────────
+const uploadDir = path.join(__dirname, 'public/uploads');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// ─────────────────────────────────────────────
-// View engine
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// VIEW ENGINE
+// ─────────────────────────────
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-app.set(
-  'views',
-  path.join(__dirname, 'views')
-);
-
-// ─────────────────────────────────────────────
-// Trust proxy Railway HTTPS
-// ─────────────────────────────────────────────
-if (process.env.RAILWAY_ENVIRONMENT) {
+// ─────────────────────────────
+// TRUST PROXY
+// ─────────────────────────────
+if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-// ─────────────────────────────────────────────
-// Static files
-// ─────────────────────────────────────────────
-app.use(
-  express.static(
-    path.join(__dirname, 'public')
-  )
-);
+// ─────────────────────────────
+// STATIC
+// ─────────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
 
-// ─────────────────────────────────────────────
-// Body parsers
-// ─────────────────────────────────────────────
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: '10mb',
-  })
-);
+// ─────────────────────────────
+// BODY PARSERS
+// ─────────────────────────────
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
 
-app.use(
-  express.json({
-    limit: '10mb',
-  })
-);
-
-// ─────────────────────────────────────────────
-// Sessions
-// ─────────────────────────────────────────────
-app.use(
-  session({
-    secret:
-      process.env.SESSION_SECRET ||
-      'menucam_secret_change_this',
-
-    resave: false,
-    saveUninitialized: false,
-
-    cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-
-      secure:
-        process.env.NODE_ENV === 'production',
-
-      httpOnly: true,
-
-      sameSite: 'lax',
-    },
-  })
-);
+// ─────────────────────────────
+// SESSION
+// ─────────────────────────────
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'menucam_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
+  }
+}));
 
 app.use(flash());
 
-// ─────────────────────────────────────────────
-// Variables globales EJS
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// GLOBALS
+// ─────────────────────────────
 app.use((req, res, next) => {
-
   res.locals.session = req.session;
-
-  res.locals.restaurantNom =
-    req.session.restaurantNom || null;
-
-  res.locals.restaurantId =
-    req.session.restaurantId || null;
-
-  res.locals.APP_URL =
-    process.env.APP_URL ||
-    `${req.protocol}://${req.get('host')}`;
-
+  res.locals.APP_URL = process.env.APP_URL || `http://localhost:${PORT}`;
   next();
 });
 
-// ─────────────────────────────────────────────
-// Socket.io
-// ─────────────────────────────────────────────
-app.set('io', io);
-
+// ─────────────────────────────
+// SOCKET EVENTS
+// ─────────────────────────────
 io.on('connection', (socket) => {
-
   log.info('Socket connecté:', socket.id);
 
-  socket.on(
-    'rejoindre_restaurant',
-    (id) => {
-
-      socket.join(`restaurant_${id}`);
-
-      log.info(
-        `Socket ${socket.id} rejoint restaurant_${id}`
-      );
-    }
-  );
+  socket.on('rejoindre_restaurant', (id) => {
+    socket.join(`restaurant_${id}`);
+    log.info(`Socket ${socket.id} rejoint restaurant_${id}`);
+  });
 
   socket.on('disconnect', () => {
     log.info('Socket déconnecté:', socket.id);
   });
 });
 
-// ─────────────────────────────────────────────
-// Health Check Railway
-// ─────────────────────────────────────────────
-app.get('/health', (req, res) => {
+app.set('io', io);
 
-  res.status(200).json({
+// ─────────────────────────────
+// HEALTH CHECK
+// ─────────────────────────────
+app.get('/health', (req, res) => {
+  res.json({
     status: 'ok',
     app: 'MenuCam V3',
-    uptime: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    time: new Date().toISOString()
   });
-
 });
 
-// ─────────────────────────────────────────────
-// Routes
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// ROUTES
+// ─────────────────────────────
 app.use('/auth', require('./routes/auth'));
 app.use('/dashboard', require('./routes/dashboard'));
 app.use('/plats', require('./routes/plats'));
@@ -214,193 +159,112 @@ app.use('/fidelite', require('./routes/fidelite'));
 app.use('/restaurants', require('./routes/restaurants'));
 app.use('/paiement', require('./routes/paiement'));
 
-// ─────────────────────────────────────────────
-// Page accueil
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// HOME
+// ─────────────────────────────
 app.get('/', (req, res) => {
-
   if (req.session.restaurantId) {
     return res.redirect('/dashboard');
   }
-
   res.render('index');
 });
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 // 404
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 app.use((req, res) => {
-
   res.status(404).render('404');
-
 });
 
-// ─────────────────────────────────────────────
-// Gestion erreurs globales
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// ERROR HANDLER
+// ─────────────────────────────
 app.use((err, req, res, next) => {
-
-  log.error('Erreur Express:', err.message);
-
-  log.error(err.stack);
-
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  res.status(500).send(
-    'Erreur serveur interne'
-  );
-
+  log.error(err.message);
+  if (res.headersSent) return next(err);
+  res.status(500).send('Erreur serveur');
 });
 
-// ─────────────────────────────────────────────
-// DB + Seed
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// DB + SEED
+// ─────────────────────────────
 const db = require('./models/db');
-
-const {
-  slugify
-} = require('./routes/restaurants');
-
 const seed = require('./seed');
 
-// ─────────────────────────────────────────────
-// Démarrage serveur
-// ─────────────────────────────────────────────
-server.listen(
-  PORT,
-  '0.0.0.0',
+// SLUGIFY LOCAL (IMPORTANT FIX)
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
+}
 
-  async () => {
+// ─────────────────────────────
+// START SERVER
+// ─────────────────────────────
+server.listen(PORT, '0.0.0.0', async () => {
+  log.ok(`MenuCam V3 démarré sur le port ${PORT}`);
 
-    log.ok(
-      `MenuCam V3 démarré sur le port ${PORT}`
-    );
+  try {
+    const count = await db.restaurants.countAsync({});
 
-    log.info(
-      `ENV: ${process.env.NODE_ENV || 'development'}`
-    );
+    if (count === 0) {
+      log.info('Base vide — seed...');
+      await seed();
+    }
 
-    log.info(
-      `APP_URL: ${
-        process.env.APP_URL ||
-        `http://localhost:${PORT}`
-      }`
-    );
+    const restos = await db.restaurants.findAsync({
+      slug: { $exists: false }
+    });
 
-    // ─────────────────────────────
-    // Initialisation DB
-    // ─────────────────────────────
-    try {
+    for (const r of restos) {
+      let slug = slugify(r.nom);
 
-      const count =
-        await db.restaurants.countAsync({});
+      let exist = await db.restaurants.findOneAsync({
+        slug,
+        _id: { $ne: r._id }
+      });
 
-      // Seed uniquement si base vide
-      if (count === 0) {
+      let i = 1;
 
-        log.info(
-          'Base vide — lancement du seed...'
-        );
-
-        await seed();
-      }
-
-      // Génération slugs manquants
-      const restos =
-        await db.restaurants.findAsync({
-          slug: { $exists: false }
+      while (exist) {
+        slug = `${slugify(r.nom)}-${i++}`;
+        exist = await db.restaurants.findOneAsync({
+          slug,
+          _id: { $ne: r._id }
         });
-
-      for (const r of restos) {
-
-        let slug = slugify(r.nom);
-
-        let existing =
-          await db.restaurants.findOneAsync({
-            slug,
-            _id: { $ne: r._id }
-          });
-
-        let suffix = 1;
-
-        while (existing) {
-
-          slug =
-            `${slugify(r.nom)}-${suffix++}`;
-
-          existing =
-            await db.restaurants.findOneAsync({
-              slug,
-              _id: { $ne: r._id }
-            });
-        }
-
-        await db.restaurants.updateAsync(
-          { _id: r._id },
-          { $set: { slug } }
-        );
       }
 
-      log.ok(
-        'Initialisation base de données terminée'
-      );
-
-    } catch (err) {
-
-      log.error(
-        'Erreur initialisation DB:',
-        err.message
+      await db.restaurants.updateAsync(
+        { _id: r._id },
+        { $set: { slug } }
       );
     }
+
+    log.ok('DB initialisée');
+  } catch (e) {
+    log.error(e.message);
   }
-);
+});
 
-// ─────────────────────────────────────────────
-// Gestion crash Node.js
-// ─────────────────────────────────────────────
-process.on(
-  'uncaughtException',
-  (err) => {
+// ─────────────────────────────
+// CRASH HANDLERS
+// ─────────────────────────────
+process.on('uncaughtException', (err) => {
+  log.error('uncaughtException', err);
+});
 
-    log.error(
-      'uncaughtException:',
-      err.message
-    );
+process.on('unhandledRejection', (err) => {
+  log.error('unhandledRejection', err);
+});
 
-    log.error(err.stack);
-
-    process.exit(1);
-  }
-);
-
-process.on(
-  'unhandledRejection',
-  (reason) => {
-
-    log.error(
-      'unhandledRejection:',
-      reason
-    );
-  }
-);
-
-// ─────────────────────────────────────────────
-// Arrêt propre Railway
-// ─────────────────────────────────────────────
 process.on('SIGTERM', () => {
-
-  log.info(
-    'SIGTERM reçu — arrêt propre...'
-  );
-
+  log.info('SIGTERM reçu');
   server.close(() => {
-
-    log.ok(
-      'Serveur arrêté proprement'
-    );
-
+    log.ok('Serveur arrêté');
     process.exit(0);
   });
 });

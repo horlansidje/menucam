@@ -46,13 +46,25 @@ async function seed() {
     const resto = await db.restaurants.insertAsync({ ...RESTAURANT, password: hash, note_moyenne: 0, nb_avis: 0, createdAt: new Date() });
     console.log(`✅  Restaurant : ${resto.nom} (${RESTAURANT.email} / ${RESTAURANT.password})`);
     let n = 0;
-    for (const p of PLATS) { await db.plats.insertAsync({ ...p, restaurant_id: resto._id, photo: null, createdAt: new Date() }); process.stdout.write(`\r🍽️  Plats : ${++n}/${PLATS.length}`); }
+    for (const p of PLATS) {
+      await db.plats.insertAsync({ ...p, restaurant_id: resto._id, photo: null, createdAt: new Date() });
+      process.stdout.write(`\r🍽️  Plats : ${++n}/${PLATS.length}`);
+    }
     console.log(`\n✅  ${n} plats ajoutés\n`);
     console.log('─'.repeat(50));
     console.log('🌐  http://localhost:3000');
     console.log(`📧  ${RESTAURANT.email}  |  🔑  ${RESTAURANT.password}`);
     console.log('─'.repeat(50)+'\n');
-  } catch(e) { console.error('Erreur:', e.message); }
-  setTimeout(() => process.exit(0), 500);
+  } catch(e) {
+    console.error('Erreur seed:', e.message);
+  }
+  // PAS de process.exit() — le serveur doit continuer à tourner
 }
-seed();
+
+// Si lancé directement (node seed.js), on peut quitter après
+if (require.main === module) {
+  seed().then(() => setTimeout(() => process.exit(0), 500));
+} else {
+  // Appelé depuis server.js via require('./seed') — on exporte juste la fonction
+  module.exports = seed;
+}

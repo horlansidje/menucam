@@ -45,7 +45,10 @@ router.get('/', requireAuth, async (req, res) => {
         enAttente: commandes.filter(c=>c.statut==='en_attente').length,
         noteMoyenne: restaurant.note_moyenne || 0,
         nbAvis: avis.length,
-        caTotal: commandes.filter(c=>c.statut!=='annulee').reduce((s,c)=>s+(c.total||0),0)
+        caTotal: commandes.filter(c=>c.statut!=='annulee').reduce((s,c)=>s+(c.total||0),0),
+        paiementsConfirmes: commandes.filter(c=>c.paiement_statut==='success').length,
+        paiementsEnAttente: commandes.filter(c=>['mtn','orange','cinetpay','stripe'].includes(c.paiement)&&c.paiement_statut!=='success'&&c.statut!=='annulee').length,
+        caPaye: commandes.filter(c=>c.paiement_statut==='success').reduce((s,c)=>s+(c.total||0),0),
       },
       caWeek, error: req.flash('error'), success: req.flash('success')
     });
@@ -68,3 +71,22 @@ router.post('/profil', requireAuth, upload.single('logo'), async (req, res) => {
 });
 
 module.exports = router;
+
+// ── Page paiements restaurateur ──────────────────────────────
+router.get('/paiements', requireAuth, async (req, res) => {
+  const { methode: filtre, statut: filtreStatut } = req.query;
+  const rid = req.session.restaurantId;
+  let query = { restaurant_id: rid };
+  if (filtre)       query.paiement        = filtre;
+  if (filtreStatut) query.paiement_statut = filtreStatut;
+  const commandes = (await db.commandes.findAsync(query)).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const all = await db.commandes.findAsync({ restaurant_id: rid });
+  res.render('restaurateur/paiements', {
+    commandes, filtre: filtre||'', filtreStatut: filtreStatut||'',
+    confirmes:     all.filter(c=>c.paiement_statut==='success').length,
+    en_attente:    all.filter(c=>['mtn','orange','cinetpay','stripe'].includes(c.paiement)&&c.paiement_statut!=='success'&&c.statut!=='annulee').length,
+    ca_paye:       all.filter(c=>c.paiement_statut==='success').reduce((s,c)=>s+(c.total||0),0),
+    whatsapp_count:all.filter(c=>c.paiement==='whatsapp').length,
+    error: req.flash('error'), success: req.flash('success')
+  });
+});

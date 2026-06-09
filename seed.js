@@ -1,8 +1,20 @@
+```js
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const db = require('./models/db');
 
-const RESTAURANT = { nom:"Chez Maman Biya", email:"demo@menucam.cm", password:"demo1234", telephone:"699000000", adresse:"Quartier Akwa, Rue de la Joie", ville:"Douala", description:"Spécialités camerounaises authentiques — Ndolé, Poulet DG, Eru et bien plus. Cuisine faite maison.", logo:null, actif:true };
+const RESTAURANT = {
+  nom: "Chez Maman Biya",
+  email: "demo@menucam.cm",
+  password: "demo1234",
+  telephone: "699000000",
+  adresse: "Quartier Akwa, Rue de la Joie",
+  ville: "Douala",
+  description:
+    "Spécialités camerounaises authentiques — Ndolé, Poulet DG, Eru et bien plus. Cuisine faite maison.",
+  logo: null,
+  actif: true
+};
 
 const PLATS = [
   {nom:"Beignets haricots",description:"Beignets croustillants servis avec poivre et piment.",prix:500,categorie:"Entrées & Collations",disponible:true},
@@ -35,24 +47,82 @@ const PLATS = [
 ];
 
 async function seed() {
-  console.log('\n🌱  Seed MenuCam V3...\n');
+  console.log('\n🌱 Seed MenuCam V3...\n');
+
   try {
-    const existing = await db.restaurants.findOneAsync({ email: RESTAURANT.email });
+
+    const existing = await db.restaurants.findOneAsync({
+      email: RESTAURANT.email
+    });
+
+    // Supprime ancien restaurant demo
     if (existing) {
-      await db.restaurants.removeAsync({ _id: existing._id });
-      await db.plats.removeAsync({ restaurant_id: existing._id }, { multi: true });
+      await db.restaurants.removeAsync(
+        { _id: existing._id },
+        {}
+      );
+
+      await db.plats.removeAsync(
+        { restaurant_id: existing._id },
+        { multi: true }
+      );
     }
+
+    // Hash password
     const hash = await bcrypt.hash(RESTAURANT.password, 10);
-    const resto = await db.restaurants.insertAsync({ ...RESTAURANT, password: hash, note_moyenne: 0, nb_avis: 0, createdAt: new Date() });
-    console.log(`✅  Restaurant : ${resto.nom} (${RESTAURANT.email} / ${RESTAURANT.password})`);
+
+    // Création restaurant
+    const resto = await db.restaurants.insertAsync({
+      ...RESTAURANT,
+      password: hash,
+      note_moyenne: 0,
+      nb_avis: 0,
+      createdAt: new Date()
+    });
+
+    console.log(
+      `✅ Restaurant : ${resto.nom} (${RESTAURANT.email} / ${RESTAURANT.password})`
+    );
+
+    // Insertion plats
     let n = 0;
-    for (const p of PLATS) { await db.plats.insertAsync({ ...p, restaurant_id: resto._id, photo: null, createdAt: new Date() }); process.stdout.write(`\r🍽️  Plats : ${++n}/${PLATS.length}`); }
-    console.log(`\n✅  ${n} plats ajoutés\n`);
+
+    for (const p of PLATS) {
+
+      await db.plats.insertAsync({
+        ...p,
+        restaurant_id: resto._id,
+        photo: null,
+        createdAt: new Date()
+      });
+
+      process.stdout.write(`\r🍽️ Plats : ${++n}/${PLATS.length}`);
+    }
+
+    console.log(`\n✅ ${n} plats ajoutés\n`);
+
     console.log('─'.repeat(50));
-    console.log('🌐  http://localhost:3000');
-    console.log(`📧  ${RESTAURANT.email}  |  🔑  ${RESTAURANT.password}`);
-    console.log('─'.repeat(50)+'\n');
-  } catch(e) { console.error('Erreur:', e.message); }
-  setTimeout(() => process.exit(0), 500);
+
+    console.log(
+      '🌐 ',
+      process.env.APP_URL ||
+      `http://localhost:${process.env.PORT || 3000}`
+    );
+
+    console.log(
+      `📧 ${RESTAURANT.email} | 🔑 ${RESTAURANT.password}`
+    );
+
+    console.log('─'.repeat(50) + '\n');
+
+  } catch (e) {
+
+    console.error('❌ Erreur seed:', e.message);
+    console.error(e.stack);
+
+  }
 }
-seed();
+
+// Export Railway compatible
+module.exports = seed;
+```

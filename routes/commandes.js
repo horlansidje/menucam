@@ -234,3 +234,64 @@ router.get('/api/stats', requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+
+// ============================================================
+// ANNULATION AVEC DÉLAI LIMITÉ (côté client)
+// ============================================================
+
+/**
+ * POST /commandes/:num/annuler-client
+ * Permet au client d'annuler sa commande dans le délai autorisé.
+ * Vérification côté serveur : délai + statut.
+ */
+router.post('/:num/annuler-client', async (req, res) => {
+  try {
+    const commande = await db.commandes.findOneAsync({ num_commande: req.params.num });
+    if (!commande) return res.json({ ok: false, message: 'Commande introuvable.' });
+
+    // Vérifier statut — pas annulable si déjà avancé
+    if (['en_preparation', 'en_livraison', 'servie', 'livree', 'annulee'].includes(commande.statut)) {
+      return res.json({ ok: false, message: 'Impossible d\'annuler : votre commande est déjà en cours de traitement.' });
+    }
+
+    // Vérifier délai — 5 minutes après création
+    const DELAI_ANNULATION_MS = (parseInt(process.env.DELAI_ANNULATION_MIN) || 5) * 60 * 1000;
+    const createdAt = new Date(commande.createdAt);
+    if (Date.now() - createdAt.getTime() > DELAI_ANNULATION_MS) {
+      return res.json({ ok: false, message: 'Le délai d\'annulation est expiré.' });
+    }
+
+    await db.commandes.updateAsync(
+      { _id: commande._id },
+      { $set: { statut: 'annulee', annulee_par: 'client', updatedAt: new Date() } }
+    );
+
+    // Notifier le restaurant
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`restaurant_${commande.restaurant_id}`).emit('commande_annulee_client', {
+        num_commande: commande.num_commande,
+        client_nom: commande.client_nom
+      });
+    }
+
+    res.json({ ok: true, message: 'Commande annulée avec succès.' });
+  } catch (err) {
+    console.error(err);
+    res.json({ ok: false, message: 'Erreur serveur.' });
+  }
+});
+
+/**
+ * GET /commandes/:num/delai-annulation
+ * Retourne le temps restant pour annuler (en secondes).
+ */
+router.get('/:num/delai-annulation', async (req, res) => {
+  const commande = await db.commandes.findOneAsync({ num_commande: req.params.num });
+  if (!commande) return res.json({ ok: false });
+  const DELAI_MS = (parseInt(process.env.DELAI_ANNULATION_MIN) || 5) * 60 * 1000;
+  const elapsed  = Date.now() - new Date(commande.createdAt).getTime();
+  const restant  = Math.max(0, DELAI_MS - elapsed);
+  const annulable = restant > 0 && commande.statut === 'en_attente';
+  res.json({ ok: true, restant_ms: restant, annulable, statut: commande.statut });
+});

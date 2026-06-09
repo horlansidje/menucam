@@ -50,7 +50,14 @@
                 <div>
                   <div style="display:flex;align-items:center;gap:8px">
                     <div class="cmd-num"><%=cmd.num_commande||''%></div>
-                    <span class="badge badge-gray" style="font-size:11px"><%=cmd.paiement==='mtn'?'📱 MTN':cmd.paiement==='orange'?'🟠 Orange':'💬 WA'%></span>
+                    <%
+                      const payLabel = cmd.paiement==='mtn'?'📱 MTN':cmd.paiement==='orange'?'🟠 Orange':cmd.paiement==='cinetpay'?'🌍 MoMo':cmd.paiement==='stripe'?'💳 Carte':'💬 WA';
+                      const payPaid  = cmd.paiement_statut==='success';
+                      const payPend  = ['mtn','orange','cinetpay','stripe'].includes(cmd.paiement) && !payPaid;
+                    %>
+                    <span class="badge badge-gray" style="font-size:11px"><%=payLabel%></span>
+                    <%if(payPaid){%><span class="badge badge-success" style="font-size:11px" title="Paiement confirmé">✅ Payé</span><%}%>
+                    <%if(payPend){%><span class="badge" style="font-size:11px;background:#FEF3C7;color:#92400E" title="Paiement en attente">⏳ En attente</span><%}%>
                   </div>
                   <div class="cmd-client-name"><%=cmd.client_nom%></div>
                   <%if(cmd.client_telephone){%><div style="font-size:12px;color:var(--text-secondary)"><i class="bi bi-telephone"></i> <%=cmd.client_telephone%></div><%}%>

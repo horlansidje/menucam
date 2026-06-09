@@ -143,7 +143,8 @@ setTimeout(async () => {
     const count = await db.restaurants.countAsync({});
     if (count === 0) {
       log.info('Base vide — lancement du seed...');
-      require('./seed');
+      const seed = require('./seed');
+      await seed();
     }
     const restos = await db.restaurants.findAsync({ slug: { $exists: false } });
     for (const r of restos) {

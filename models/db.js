@@ -1,23 +1,15 @@
-const Datastore = require('@seald-io/nedb');
-const path = require('path');
-const fs = require('fs');
+/**
+ * ══════════════════════════════════════════════════════════
+ *  MenuCam V3 — Couche Base de Données Universelle
+ *  ► Si MONGODB_URI est défini → MongoDB Atlas (persistant)
+ *  ► Sinon → NeDB local (dev) ou /tmp (Railway sans Mongo)
+ * ══════════════════════════════════════════════════════════
+ */
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, '../data');
-if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
+const MONGODB_URI = process.env.MONGODB_URI;
 
-const db = {
-  restaurants: new Datastore({ filename: path.join(dbPath, 'restaurants.db'), autoload: true }),
-  plats:       new Datastore({ filename: path.join(dbPath, 'plats.db'),       autoload: true }),
-  commandes:   new Datastore({ filename: path.join(dbPath, 'commandes.db'),   autoload: true }),
-  livreurs:    new Datastore({ filename: path.join(dbPath, 'livreurs.db'),    autoload: true }),
-  promos:      new Datastore({ filename: path.join(dbPath, 'promos.db'),      autoload: true }),
-  avis:        new Datastore({ filename: path.join(dbPath, 'avis.db'),        autoload: true }),
-};
-
-db.restaurants.ensureIndex({ fieldName: 'email', unique: true });
-db.plats.ensureIndex({ fieldName: 'restaurant_id' });
-db.commandes.ensureIndex({ fieldName: 'restaurant_id' });
-db.commandes.ensureIndex({ fieldName: 'num_commande' });
-
-module.exports = db;
-// (already loaded above)
+if (MONGODB_URI) {
+  module.exports = require('./db-mongo');
+} else {
+  module.exports = require('./db-nedb');
+}

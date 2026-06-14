@@ -26,7 +26,7 @@ router.get('/', requireAuth, async (req, res) => {
     const today = new Date(); today.setHours(0,0,0,0);
     const todayC = commandes.filter(c => new Date(c.createdAt) >= today);
     const recentes = commandes.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,8);
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT||3000}`;
+    const baseUrl = process.env.APP_URL || process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const menuUrl = `${baseUrl}/menu/${rid}`;
     const qrDataUrl = await QRCode.toDataURL(menuUrl, { width: 280, margin: 2, color: { dark: '#111827', light: '#ffffff' } });
     const caWeek = [];

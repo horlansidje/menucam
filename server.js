@@ -20,6 +20,7 @@ const server = http.createServer(app);
 
 // ── PORT dynamique Railway ───────────────────────────────
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // ── Socket.io avec CORS Railway ─────────────────────────
 const allowedOrigins = process.env.APP_URL
@@ -35,7 +36,7 @@ const io = new Server(server, {
   transports: ['websocket', 'polling'],
 });
 
-// ── Upload path (persistant via variable d'env sur Railway) ─
+// ── Upload path ──────────────────────────────────────────
 const uploadDir = process.env.UPLOAD_PATH || path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -58,11 +59,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'menucam_v3_secret_change_en_prod',
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production', // HTTPS en prod
+    secure: isProduction ? 'auto' : false,
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
   },
 }));
 
